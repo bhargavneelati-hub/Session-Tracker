@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Tracker — B3 & B3a</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0f0e0c; --ink-2:#3a3832; --ink-3:#7a7670;
+  --paper:#f5f2ec; --paper-2:#ece9e1; --paper-3:#e0ddd4;
+  --accent:#1a3a2a; --accent-l:#e6f0ea;
+  --red:#c8452a; --red-l:#fce8e4;
+  --gold:#b8860b; --gold-l:#fdf3d8;
+  --line:#d0cdc4; --r:6px;
+  --green:#0b5e30; --green-l:#e6f4ee;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Instrument Sans',sans-serif;min-height:100vh}
+
+.hdr{background:var(--accent);color:var(--paper);padding:1.75rem 2rem 1.5rem;border-bottom:3px solid var(--ink)}
+.hdr-eye{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8ab9a0;margin-bottom:.4rem}
+.hdr h1{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:400;color:#f0edea;line-height:1.1}
+.hdr-sub{font-size:12px;color:#8ab9a0;margin-top:.4rem;line-height:1.5}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:2px solid var(--ink)}
+.tab-btn{background:var(--paper-2);border:none;border-right:1px solid var(--line);padding:.9rem .4rem .75rem;cursor:pointer;text-align:center;transition:background .15s;position:relative}
+.tab-btn:last-child{border-right:none}
+.tab-btn.active{background:var(--paper);border-bottom:3px solid var(--accent);margin-bottom:-2px;z-index:2}
+.tab-btn .tnum{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+.tab-btn.active .tnum{color:var(--accent)}
+.tab-btn .tlabel{font-family:'DM Serif Display',serif;font-size:clamp(.85rem,2.5vw,1.05rem);color:var(--ink-2);display:block}
+.tab-btn.active .tlabel{color:var(--ink)}
+.tab-btn .tsub{font-size:11px;color:var(--ink-3);display:block;margin-top:1px}
+
+.content{max-width:640px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+.panel{display:none}.panel.active{display:block}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.35rem;margin-bottom:1.1rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.card-title::after{content:'';flex:1;height:1px;background:var(--line)}
+
+.field{margin-bottom:1rem}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:.35rem}
+.hint{font-size:11px;color:var(--ink-3);margin-bottom:.35rem;line-height:1.4}
+input[type=text],input[type=number],textarea,select{width:100%;padding:.5rem .7rem;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--r);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,58,42,.1);background:#fff}
+textarea{resize:vertical;min-height:56px;line-height:1.5}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* CHIPS — data-val based selection, no onclick string matching */
+.chip-group{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.chip{padding:.35rem .8rem;border:1px solid var(--line);border-radius:20px;font-size:12px;cursor:pointer;background:var(--paper);color:var(--ink-2);transition:all .12s;white-space:nowrap;-webkit-user-select:none;user-select:none;border:1px solid var(--line)}
+.chip:hover{border-color:var(--accent)}
+.chip.c-neutral{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.c-good{background:var(--green);color:#fff;border-color:var(--green)}
+.chip.c-warn{background:var(--gold);color:#fff;border-color:var(--gold)}
+.chip.c-bad{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* RATING STRIPS */
+.r-strip{display:flex;gap:5px;margin-top:2px}
+.r-btn{flex:1;padding:.45rem 0;border:1px solid var(--line);border-radius:4px;background:var(--paper);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;text-align:center;transition:all .12s;color:var(--ink-2)}
+.r-btn:hover{border-color:var(--accent)}
+.r-btn.r-sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.r-val{font-size:11px;color:var(--ink-3);margin-top:.3rem;font-family:'DM Mono',monospace;text-align:center;min-height:1em}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cx-score{grid-column:span 2;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:.7rem 1rem;display:flex;align-items:center;gap:.9rem}
+.cx-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--accent);line-height:1;min-width:2.2rem;text-align:center}
+.cx-lbl{font-size:12px;color:var(--ink-2);line-height:1.5;flex:1}
+.cx-time{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;margin-top:2px}
+
+/* INTERRUPT */
+.interrupt{background:var(--paper-2);border-left:4px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:.85rem 1rem;font-family:'DM Serif Display',serif;font-style:italic;font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:.7rem}
+
+/* PACE */
+.pace-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:.65rem 1rem;display:flex;align-items:center;gap:.9rem;margin-top:.5rem}
+.pace-icon{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--accent);min-width:2rem;text-align:center}
+.pace-lbl{font-size:12px;color:var(--ink-2);line-height:1.5}
+.pace-dtl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;margin-top:2px}
+
+/* PENDING LIST */
+.pending-hdr{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.pending-hdr label{font-size:12px;font-weight:600;color:var(--ink-2)}
+.pending-hdr select{width:auto;font-size:12px;padding:.3rem .6rem}
+.empty-state{font-size:13px;color:var(--ink-3);padding:1.25rem 0;text-align:center;font-style:italic}
+.si{border:1px solid var(--line);border-radius:var(--r);padding:.85rem 1rem;margin-bottom:.6rem;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.si:hover{border-color:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.si.selected{border-color:var(--accent);border-width:2px;background:var(--accent-l)}
+.si-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.si-task{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.si-date{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;white-space:nowrap}
+.si-meta{font-size:11px;color:var(--ink-3);margin-top:4px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.si-pred{font-size:12px;color:var(--ink-2);margin-top:5px;font-style:italic;border-left:2px solid var(--line);padding-left:.5rem;line-height:1.4}
+.badge{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'DM Mono',monospace;font-weight:500}
+.bd{background:var(--accent-l);color:var(--accent)}
+.bc{background:var(--gold-l);color:var(--gold)}
+.bk{background:var(--paper-3);color:var(--ink-2)}
+.bg{background:var(--green-l);color:var(--green)}
+
+.sel-box{background:var(--accent-l);border:1px solid #a8c9b8;border-radius:var(--r);padding:1rem;margin-bottom:1rem}
+.sel-box-title{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:.35rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.sel-box-task{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:.25rem}
+.sel-box-pred{font-size:12px;color:var(--ink-2);font-style:italic;border-left:3px solid var(--accent);padding-left:.5rem;margin-top:.35rem;line-height:1.5}
+
+/* BTNS */
+.btn-row{display:flex;gap:.65rem;margin-top:1.25rem;align-items:center;flex-wrap:wrap}
+.btn{padding:.65rem 1.25rem;border-radius:var(--r);border:1px solid var(--line);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#0f2518}
+.btn-secondary{background:var(--paper);color:var(--ink-2)}.btn-secondary:hover{background:var(--paper-3)}
+.btn-complete{background:var(--green);color:#fff;border-color:var(--green)}.btn-complete:hover{background:#083d1e}
+
+.status{font-size:13px;padding:.55rem .85rem;border-radius:var(--r);margin-top:.65rem;display:none;line-height:1.4}
+.status.ok{background:var(--green-l);color:var(--green);display:block}
+.status.err{background:var(--red-l);color:var(--red);display:block}
+
+.setup-box{background:#fff;border:1.5px dashed var(--line);border-radius:var(--r);padding:1.35rem;margin-bottom:1.25rem}
+.setup-title{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-bottom:.5rem}
+.setup-steps{font-size:12px;color:var(--ink-2);line-height:2;counter-reset:steps;list-style:none;padding:0}
+.setup-steps li{counter-increment:steps;padding-left:1.6rem;position:relative;margin-bottom:.1rem}
+.setup-steps li::before{content:counter(steps);position:absolute;left:0;font-family:'DM Mono',monospace;font-size:9px;background:var(--accent);color:#fff;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;top:3px}
+.setup-steps code{font-family:'DM Mono',monospace;font-size:10px;background:var(--paper-2);padding:1px 5px;border-radius:3px;color:var(--red)}
+.url-field{width:100%;margin-top:.65rem;padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);color:var(--ink-2)}
+pre.scode{margin-top:.65rem;background:var(--ink);padding:1rem;border-radius:var(--r);font-size:10px;font-family:'DM Mono',monospace;overflow-x:auto;line-height:1.7;white-space:pre-wrap;color:#c8e6c0}
+details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:600;margin-top:.75rem}
+
+.prog{display:flex;gap:5px;margin-bottom:1.25rem;align-items:center}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .2s}
+.pdot.done{background:var(--accent)}.pdot.cur{background:var(--red)}
+.prog-lbl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;letter-spacing:.06em;margin-left:4px}
+
+@media(max-width:500px){
+  .hdr{padding:1.25rem 1rem 1.1rem}
+  .content{padding:1.25rem .9rem 3rem}
+  .cx-grid{grid-template-columns:1fr}.cx-score{grid-column:1}
+  .tab-btn .tsub{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-eye">B3 · B3a — Unified tracker</div>
+  <h1>Session Intelligence Log</h1>
+  <p class="hdr-sub">Before · During · After — each phase is independent. Sessions persist across time gaps.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('before')" id="tab-before">
+    <span class="tnum">Phase 01</span><span class="tlabel">Before</span><span class="tsub">Setup &amp; predict</span>
+  </button>
+  <button class="tab-btn" onclick="showTab('during')" id="tab-during">
+    <span class="tnum">Phase 02</span><span class="tlabel">During</span><span class="tsub">Mid-session check</span>
+  </button>
+  <button class="tab-btn" onclick="showTab('after')" id="tab-after">
+    <span class="tnum">Phase 03</span><span class="tlabel">After</span><span class="tsub">Score &amp; close</span>
+  </button>
+</div>
+
+<div class="content">
+
+<!-- ════════════════════════════════════════════ BEFORE -->
+<div class="panel active" id="panel-before">
+  <div class="prog"><div class="pdot cur"></div><div class="pdot"></div><div class="pdot"></div><span class="prog-lbl">step 1 of 3</span></div>
+
+  <div class="card">
+    <div class="card-title">Task</div>
+    <div class="field">
+      <label>What is this session about?</label>
+      <div class="hint">One line — enough to identify it later when you return.</div>
+      <textarea id="b-task" rows="2" placeholder="e.g. Draft the client proposal response…"></textarea>
+    </div>
+    <div class="field">
+      <label>Domain</label>
+      <select id="b-domain">
+        <option value="people">People / relationships</option>
+        <option value="strategy">Strategy / direction</option>
+        <option value="execution">Execution / process</option>
+        <option value="technical">Technical / analytical</option>
+        <option value="creative">Creative / taste</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Complexity tax (B3a)</div>
+    <div class="hint" style="margin-bottom:.75rem">Rate the problem before rating yourself. This gives you a reference point when it takes time.</div>
+    <div class="cx-grid">
+      <div class="field">
+        <label>Novelty</label>
+        <select id="b-novelty" onchange="calcCx()">
+          <option value="1">1 — Familiar ground</option>
+          <option value="2">2 — Mostly familiar</option>
+          <option value="3">3 — Mixed</option>
+          <option value="4">4 — Mostly new</option>
+          <option value="5">5 — New territory</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Stakes</label>
+        <select id="b-stakes" onchange="calcCx()">
+          <option value="1">1 — Low / reversible</option>
+          <option value="2">2</option>
+          <option value="3">3 — Medium</option>
+          <option value="4">4</option>
+          <option value="5">5 — High / hard to undo</option>
+        </select>
+      </div>
+      <div class="cx-score">
+        <div class="cx-num" id="cx-score">1</div>
+        <div><div class="cx-lbl" id="cx-lbl">Very low — move quickly.</div><div class="cx-time" id="cx-time">Expected: 10–20 min</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Confidence prediction (B3)</div>
+    <div class="field">
+      <label>What do you predict will happen / what is your conclusion?</label>
+      <div class="hint">Commit before you know the outcome. This commitment is what makes B3 work.</div>
+      <textarea id="b-prediction" rows="2" placeholder="e.g. I think the client will push back on pricing but accept the timeline…"></textarea>
+    </div>
+    <div class="field">
+      <label>How confident are you right now? (1 = very uncertain → 5 = very sure)</label>
+      <div class="r-strip" id="strip-conf">
+        <button class="r-btn" onclick="setRating('conf',1)">1</button>
+        <button class="r-btn" onclick="setRating('conf',2)">2</button>
+        <button class="r-btn" onclick="setRating('conf',3)">3</button>
+        <button class="r-btn" onclick="setRating('conf',4)">4</button>
+        <button class="r-btn" onclick="setRating('conf',5)">5</button>
+      </div>
+      <div class="r-val" id="val-conf">tap to rate</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Interrupt check (B3a)</div>
+    <div class="interrupt">"This is taking time because I am thinking, not because I am broken."</div>
+    <div class="field">
+      <label>Is the FOMO / pace anxiety loop active right now?</label>
+      <div class="chip-group" id="chips-loop">
+        <button class="chip" data-val="no">No — clear to start</button>
+        <button class="chip" data-val="mild">Mild — noted</button>
+        <button class="chip" data-val="yes">Yes — used phrase</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveSession()">Save &amp; start session →</button>
+  </div>
+  <div id="before-status" class="status"></div>
+</div>
+
+<!-- ════════════════════════════════════════════ DURING -->
+<div class="panel" id="panel-during">
+  <div class="prog"><div class="pdot done"></div><div class="pdot cur"></div><div class="pdot"></div><span class="prog-lbl">step 2 of 3 — optional</span></div>
+
+  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1.1rem;line-height:1.6">Select an open session to log a mid-session check-in. Skip entirely if you are in flow — do not interrupt good thinking.</p>
+
+  <div class="card">
+    <div class="card-title">Open sessions</div>
+    <div class="pending-hdr">
+      <label>Filter:</label>
+      <select id="dur-filter" onchange="renderDuringList()"><option value="all">All months</option></select>
+    </div>
+    <div id="during-list"></div>
+  </div>
+
+  <div id="during-form" style="display:none">
+    <div class="sel-box" id="dur-sel-box"></div>
+    <div class="card">
+      <div class="card-title">Mid-session check-in</div>
+      <div class="field">
+        <label>Anxiety about pace — mid-session level (1 = none → 5 = strong)</label>
+        <div class="r-strip" id="strip-anx">
+          <button class="r-btn" onclick="setRating('anx',1)">1</button>
+          <button class="r-btn" onclick="setRating('anx',2)">2</button>
+          <button class="r-btn" onclick="setRating('anx',3)">3</button>
+          <button class="r-btn" onclick="setRating('anx',4)">4</button>
+          <button class="r-btn" onclick="setRating('anx',5)">5</button>
+        </div>
+        <div class="r-val" id="val-anx">tap to rate</div>
+      </div>
+      <div class="field">
+        <label>Self-rated clarity right now</label>
+        <div class="chip-group" id="chips-clarity">
+          <button class="chip" data-val="clear">Clear</button>
+          <button class="chip" data-val="uncertain">Uncertain</button>
+          <button class="chip" data-val="compromised">Compromised</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Did you use the interrupt phrase?</label>
+        <div class="chip-group" id="chips-phrase">
+          <button class="chip" data-val="no">No — not needed</button>
+          <button class="chip" data-val="yes">Yes — helped</button>
+          <button class="chip" data-val="partial">Yes — partial</button>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveDuring()">Save check-in</button>
+      <button class="btn btn-secondary" onclick="cancelDuring()">Cancel</button>
+    </div>
+    <div id="during-status" class="status"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ AFTER -->
+<div class="panel" id="panel-after">
+  <div class="prog"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot cur"></div><span class="prog-lbl">step 3 of 3</span></div>
+
+  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1.1rem;line-height:1.6">Select an open session to score and close. Completing removes it from all pending lists and submits to Google Sheets.</p>
+
+  <div class="card">
+    <div class="card-title">Open sessions</div>
+    <div class="pending-hdr">
+      <label>Filter:</label>
+      <select id="aft-filter" onchange="renderAfterList()"><option value="all">All months</option></select>
+    </div>
+    <div id="after-list"></div>
+  </div>
+
+  <div id="after-form" style="display:none">
+    <div class="sel-box" id="aft-sel-box"></div>
+
+    <div class="card">
+      <div class="card-title">Prediction outcome (B3)</div>
+      <div class="field">
+        <label>Was your prediction correct?</label>
+        <div class="chip-group" id="chips-outcome">
+          <button class="chip" data-val="correct">Correct</button>
+          <button class="chip" data-val="partial">Partial</button>
+          <button class="chip" data-val="wrong">Wrong</button>
+          <button class="chip" data-val="pending">Not yet known</button>
+        </div>
+      </div>
+      <div class="field" id="outcome-note-wrap" style="display:none">
+        <label>What actually happened? (one line)</label>
+        <textarea id="a-outcome-note" rows="2" placeholder="e.g. Client accepted pricing but pushed back on timeline…"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Session quality (B3a)</div>
+      <div class="field">
+        <label>Output quality — honest view (1 = poor → 5 = strong)</label>
+        <div class="r-strip" id="strip-qual">
+          <button class="r-btn" onclick="setRating('qual',1)">1</button>
+          <button class="r-btn" onclick="setRating('qual',2)">2</button>
+          <button class="r-btn" onclick="setRating('qual',3)">3</button>
+          <button class="r-btn" onclick="setRating('qual',4)">4</button>
+          <button class="r-btn" onclick="setRating('qual',5)">5</button>
+        </div>
+        <div class="r-val" id="val-qual">tap to rate</div>
+      </div>
+      <div class="field">
+        <label>Time taken (minutes)</label>
+        <input type="number" id="a-time" min="1" max="960" placeholder="e.g. 45" oninput="showPace()">
+      </div>
+      <div id="pace-wrap" style="display:none">
+        <div class="pace-box">
+          <div class="pace-icon" id="pace-icon">—</div>
+          <div><div class="pace-lbl" id="pace-lbl">Pace verdict</div><div class="pace-dtl" id="pace-dtl"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">One-line reflection</div>
+      <div class="field">
+        <label>What will you do differently next time? (optional)</label>
+        <textarea id="a-reflect" rows="2" placeholder="e.g. Setting the complexity score first reduced the pace anxiety immediately."></textarea>
+      </div>
+    </div>
+
+    <div class="setup-box" id="setup-box">
+      <div class="setup-title">First time? Set up your Google Sheet</div>
+      <ol class="setup-steps">
+        <li>Create a new Google Sheet named <code>Session Log</code></li>
+        <li>Paste headers in row 1:<br><code>Date | Task | Domain | Novelty | Stakes | Complexity | Prediction | Confidence | Loop | Clarity | Anxiety | Phrase | Outcome | Quality | Time | Expected Time | Pace OK | Reflection</code></li>
+        <li>Go to <strong>Extensions → Apps Script</strong>, paste the script below, save &amp; deploy as Web App</li>
+        <li>Copy the Web App URL and paste it here:</li>
+      </ol>
+      <input type="text" class="url-field" id="sheets-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" oninput="saveUrl()">
+      <div style="margin-top:.4rem;font-size:11px;color:var(--ink-3)">Saved in this browser — configure once only.</div>
+      <details>
+        <summary>Show Apps Script code ↓</summary>
+        <pre class="scode">function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Session Log") || ss.getActiveSheet();
+  var p = e.parameter;
+  sheet.appendRow([
+    p.date, p.task, p.domain, p.novelty, p.stakes,
+    p.complexity, p.prediction, p.confidence, p.loop,
+    p.clarity, p.anxiety, p.phrase, p.outcome,
+    p.quality, p.time, p.expected_time, p.pace_ok, p.reflection
+  ]);
+  return ContentService
+    .createTextOutput(JSON.stringify({status:"ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:.5rem;line-height:1.6">Deploy → New deployment → Web app → Execute as: Me → Who has access: Anyone → Copy URL.</div>
+      </details>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-complete" onclick="completeSession()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Complete &amp; submit to Sheets
+      </button>
+      <button class="btn btn-secondary" onclick="cancelAfter()">Cancel</button>
+    </div>
+    <div id="after-status" class="status"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════════════════════════════
+const SKEY = 'b3_sessions_v3';
+const UKEY = 'b3_sheets_url';
+let sessions = [];
+let selDur = null, selAft = null;
+
+function loadS(){ try{ sessions=JSON.parse(localStorage.getItem(SKEY)||'[]'); }catch(e){ sessions=[]; } }
+function saveS(){ try{ localStorage.setItem(SKEY,JSON.stringify(sessions)); }catch(e){} }
+function saveUrl(){ try{ localStorage.setItem(UKEY,document.getElementById('sheets-url').value.trim()); }catch(e){} }
+function loadUrl(){
+  try{
+    const u=localStorage.getItem(UKEY)||'';
+    if(u){ document.getElementById('sheets-url').value=u; document.getElementById('setup-box').style.display='none'; }
+  }catch(e){}
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+// ══════════════════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════════════════
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='during'){ buildFilter('dur-filter'); renderDuringList(); }
+  if(id==='after') { buildFilter('aft-filter'); renderAfterList(); loadUrl(); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  COMPLEXITY
+// ══════════════════════════════════════════════════════════════════
+const CXD = {
+  1:{l:'Very low — move quickly.',t:'Expected: 10–20 min',min:10,max:30},
+  2:{l:'Low.',t:'Expected: 15–30 min',min:15,max:45},
+  3:{l:'Low-moderate.',t:'Expected: 20–40 min',min:20,max:60},
+  4:{l:'Moderate.',t:'Expected: 30–60 min',min:30,max:90},
+  5:{l:'Moderate.',t:'Expected: 40–75 min',min:40,max:110},
+  6:{l:'Medium — take your time.',t:'Expected: 45–90 min',min:45,max:135},
+  8:{l:'Complex — sustained thinking.',t:'Expected: 60–120 min',min:60,max:180},
+  9:{l:'Complex.',t:'Expected: 60–120 min',min:60,max:180},
+  10:{l:'High complexity — proportional.',t:'Expected: 90–180 min',min:90,max:270},
+  12:{l:'High complexity.',t:'Expected: 2–4 hours',min:120,max:360},
+  15:{l:'Very high — half day is fine.',t:'Expected: 3–5 hours',min:180,max:480},
+  16:{l:'Very high.',t:'Expected: 3–6 hours',min:180,max:540},
+  20:{l:'Exceptional.',t:'Expected: multi-session',min:360,max:9999},
+  25:{l:'Maximum complexity.',t:'Expected: sustained days',min:480,max:9999},
+};
+function getCx(score){ const keys=Object.keys(CXD).map(Number).sort((a,b)=>a-b); let d=CXD[1]; for(const k of keys){if(score>=k)d=CXD[k];} return d; }
+function calcCx(){
+  const n=+document.getElementById('b-novelty').value;
+  const s=+document.getElementById('b-stakes').value;
+  const sc=n*s; const d=getCx(sc);
+  document.getElementById('cx-score').textContent=sc;
+  document.getElementById('cx-lbl').textContent=d.l;
+  document.getElementById('cx-time').textContent=d.t;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RATINGS
+// ══════════════════════════════════════════════════════════════════
+const RLBL = {
+  conf:{1:'Very uncertain',2:'Somewhat uncertain',3:'Moderate',4:'Fairly confident',5:'Very confident'},
+  anx: {1:'None',2:'Mild',3:'Moderate',4:'Strong',5:'Very strong'},
+  qual:{1:'Poor',2:'Weak',3:'Adequate',4:'Good',5:'Very strong'},
+};
+const ratings = {conf:0, anx:0, qual:0};
+function setRating(type,val){
+  ratings[type]=val;
+  document.querySelectorAll('#strip-'+type+' .r-btn').forEach((b,i)=>b.classList.toggle('r-sel',i<val));
+  const v=document.getElementById('val-'+type);
+  if(v) v.textContent=val+' — '+(RLBL[type][val]||'');
+  if(type==='qual') showPace();
+}
+function resetRating(type){
+  ratings[type]=0;
+  document.querySelectorAll('#strip-'+type+' .r-btn').forEach(b=>b.classList.remove('r-sel'));
+  const v=document.getElementById('val-'+type); if(v) v.textContent='tap to rate';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  CHIPS — fixed: uses data-val, no onclick string parsing
+// ══════════════════════════════════════════════════════════════════
+const chipState = {loop:'', clarity:'', phrase:'', outcome:''};
+// colour map per group per value
+const CMAP = {
+  loop:    {no:'c-good',   mild:'c-warn',    yes:'c-bad'},
+  clarity: {clear:'c-good',uncertain:'c-warn',compromised:'c-bad'},
+  phrase:  {no:'c-neutral',yes:'c-good',     partial:'c-warn'},
+  outcome: {correct:'c-good',partial:'c-warn',wrong:'c-bad',pending:'c-neutral'},
+};
+// attach chip listeners after DOM ready (not via onclick in HTML)
+function initChips(){
+  document.querySelectorAll('.chip-group').forEach(group=>{
+    const gname = group.id.replace('chips-','');
+    group.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click',()=>{
+        const val = chip.getAttribute('data-val');
+        chipState[gname]=val;
+        // clear all in group
+        group.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
+        // apply colour class
+        const cls=(CMAP[gname]&&CMAP[gname][val])||'c-neutral';
+        chip.classList.add(cls);
+        // side-effect: outcome note
+        if(gname==='outcome'){
+          document.getElementById('outcome-note-wrap').style.display=(val!=='pending')?'block':'none';
+        }
+      });
+    });
+  });
+}
+function resetChips(gname){
+  chipState[gname]='';
+  const g=document.getElementById('chips-'+gname);
+  if(g) g.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
+  if(gname==='outcome') document.getElementById('outcome-note-wrap').style.display='none';
+}
+function setChipByVal(gname, val){
+  if(!val) return;
+  chipState[gname]=val;
+  const g=document.getElementById('chips-'+gname); if(!g) return;
+  g.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
+  const chip=g.querySelector('[data-val="'+val+'"]');
+  if(chip){ const cls=(CMAP[gname]&&CMAP[gname][val])||'c-neutral'; chip.classList.add(cls); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  PACE VERDICT
+// ══════════════════════════════════════════════════════════════════
+function showPace(){
+  const time=+document.getElementById('a-time').value;
+  const wrap=document.getElementById('pace-wrap');
+  if(!time||!selAft){ wrap.style.display='none'; return; }
+  const sess=sessions.find(s=>s.id===selAft); if(!sess){ wrap.style.display='none'; return; }
+  const d=getCx(sess.complexity);
+  const fast=time<d.min, ok=time>=d.min&&time<=d.max;
+  document.getElementById('pace-icon').textContent=ok?'✓':fast?'↑':'→';
+  document.getElementById('pace-lbl').textContent=ok?'Proportional to complexity score.':fast?'Faster than expected — good.':'Longer than typical range — check context.';
+  document.getElementById('pace-dtl').textContent=d.t+' · Your time: '+time+' min';
+  wrap.style.display='block';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MONTH FILTER
+// ══════════════════════════════════════════════════════════════════
+function mkey(iso){ const d=new Date(iso); return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}); }
+function buildFilter(selId){
+  const sel=document.getElementById(selId);
+  const cur=sel.value;
+  const open=sessions.filter(s=>s.status==='open');
+  const months=[...new Set(open.map(s=>mkey(s.date)))].sort((a,b)=>new Date('1 '+a)-new Date('1 '+b));
+  sel.innerHTML='<option value="all">All months</option>';
+  months.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o); });
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+function filterM(list,selId){ const m=document.getElementById(selId).value; return m==='all'?list:list.filter(s=>mkey(s.date)===m); }
+
+// ══════════════════════════════════════════════════════════════════
+//  FORMAT
+// ══════════════════════════════════════════════════════════════════
+function fmtFull(iso){ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtShort(iso){ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════════════════════════
+//  SAVE SESSION (Before)
+// ══════════════════════════════════════════════════════════════════
+function saveSession(){
+  const task=document.getElementById('b-task').value.trim();
+  const pred=document.getElementById('b-prediction').value.trim();
+  if(!task){ showSt('before-status','err','Add a task description.'); return; }
+  if(!pred){ showSt('before-status','err','Add your prediction before starting.'); return; }
+  if(!ratings.conf){ showSt('before-status','err','Rate your confidence (1–5).'); return; }
+  const n=+document.getElementById('b-novelty').value, s=+document.getElementById('b-stakes').value, cx=n*s;
+  sessions.push({
+    id:uid(), date:new Date().toISOString(),
+    task, domain:document.getElementById('b-domain').value,
+    novelty:n, stakes:s, complexity:cx, expected_time:getCx(cx).t,
+    prediction:pred, confidence:ratings.conf, loop:chipState.loop||'not-recorded',
+    clarity:'', anxiety:'', phrase:'',
+    outcome:'', outcome_note:'', quality:'', time:'', pace_ok:'', reflection:'',
+    status:'open'
+  });
+  saveS();
+  showSt('before-status','ok','Session saved ✓ — go do the work. Return to During or After whenever ready.');
+  // reset
+  document.getElementById('b-task').value='';
+  document.getElementById('b-prediction').value='';
+  document.getElementById('b-domain').value='people';
+  document.getElementById('b-novelty').value='1';
+  document.getElementById('b-stakes').value='1';
+  calcCx(); resetRating('conf'); resetChips('loop');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DURING
+// ══════════════════════════════════════════════════════════════════
+function renderDuringList(){
+  const open=sessions.filter(s=>s.status==='open');
+  const list=filterM(open,'dur-filter').sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const el=document.getElementById('during-list');
+  if(!list.length){ el.innerHTML='<div class="empty-state">No open sessions — log one in Before first.</div>'; return; }
+  el.innerHTML=list.map(s=>`
+    <div class="si${selDur===s.id?' selected':''}" onclick="selectDuring('${s.id}')">
+      <div class="si-top"><div class="si-task">${esc(s.task)}</div><div class="si-date">${fmtShort(s.date)}</div></div>
+      <div class="si-meta">
+        <span class="badge bd">${s.domain}</span>
+        <span class="badge bc">cx ${s.complexity}</span>
+        <span class="badge bk">conf ${s.confidence}/5</span>
+        ${s.clarity?'<span class="badge bg">check-in ✓</span>':''}
+      </div>
+      <div class="si-pred">"${esc(s.prediction)}"</div>
+    </div>`).join('');
+}
+function selectDuring(id){
+  selDur=id;
+  const s=sessions.find(x=>x.id===id);
+  renderDuringList();
+  document.getElementById('dur-sel-box').innerHTML=`
+    <div class="sel-box-title">Selected — ${fmtFull(s.date)}</div>
+    <div class="sel-box-task">${esc(s.task)}</div>
+    <div class="sel-box-pred">"${esc(s.prediction)}"</div>`;
+  resetRating('anx'); resetChips('clarity'); resetChips('phrase');
+  if(s.anxiety) setRating('anx',+s.anxiety);
+  if(s.clarity) setChipByVal('clarity',s.clarity);
+  if(s.phrase)  setChipByVal('phrase',s.phrase);
+  document.getElementById('during-form').style.display='block';
+  document.getElementById('during-status').className='status';
+}
+function saveDuring(){
+  if(!selDur){ showSt('during-status','err','Select a session first.'); return; }
+  const s=sessions.find(x=>x.id===selDur);
+  s.anxiety=ratings.anx||''; s.clarity=chipState.clarity||''; s.phrase=chipState.phrase||'';
+  saveS(); showSt('during-status','ok','Check-in saved ✓ — carry on.'); renderDuringList();
+}
+function cancelDuring(){ selDur=null; document.getElementById('during-form').style.display='none'; renderDuringList(); }
+
+// ══════════════════════════════════════════════════════════════════
+//  AFTER
+// ══════════════════════════════════════════════════════════════════
+function renderAfterList(){
+  const open=sessions.filter(s=>s.status==='open');
+  const list=filterM(open,'aft-filter').sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const el=document.getElementById('after-list');
+  if(!list.length){ el.innerHTML='<div class="empty-state">No open sessions — log one in Before first.</div>'; return; }
+  el.innerHTML=list.map(s=>`
+    <div class="si${selAft===s.id?' selected':''}" onclick="selectAfter('${s.id}')">
+      <div class="si-top"><div class="si-task">${esc(s.task)}</div><div class="si-date">${fmtShort(s.date)}</div></div>
+      <div class="si-meta">
+        <span class="badge bd">${s.domain}</span>
+        <span class="badge bc">cx ${s.complexity}</span>
+        <span class="badge bk">conf ${s.confidence}/5</span>
+        ${s.clarity?'<span class="badge bg">check-in ✓</span>':''}
+      </div>
+      <div class="si-pred">"${esc(s.prediction)}"</div>
+    </div>`).join('');
+}
+function selectAfter(id){
+  selAft=id;
+  const s=sessions.find(x=>x.id===id);
+  renderAfterList();
+  document.getElementById('aft-sel-box').innerHTML=`
+    <div class="sel-box-title">Closing — ${fmtFull(s.date)}</div>
+    <div class="sel-box-task">${esc(s.task)}</div>
+    <div class="sel-box-pred">"${esc(s.prediction)}"</div>`;
+  resetRating('qual'); resetChips('outcome');
+  document.getElementById('a-time').value='';
+  document.getElementById('a-reflect').value='';
+  document.getElementById('a-outcome-note').value='';
+  document.getElementById('pace-wrap').style.display='none';
+  document.getElementById('outcome-note-wrap').style.display='none';
+  document.getElementById('after-status').className='status';
+  document.getElementById('after-form').style.display='block';
+}
+async function completeSession(){
+  if(!selAft){ showSt('after-status','err','Select a session first.'); return; }
+  if(!chipState.outcome){ showSt('after-status','err','Score the prediction outcome.'); return; }
+  if(!ratings.qual){ showSt('after-status','err','Rate the output quality.'); return; }
+  const s=sessions.find(x=>x.id===selAft);
+  const time=+document.getElementById('a-time').value||'';
+  const d=getCx(s.complexity);
+  const pok=time?(time<d.min?'fast':time<=d.max?'ok':'long'):'';
+  s.outcome=chipState.outcome;
+  s.outcome_note=document.getElementById('a-outcome-note').value.trim();
+  s.quality=ratings.qual; s.time=time; s.pace_ok=pok;
+  s.reflection=document.getElementById('a-reflect').value.trim();
+  s.status='done';
+  saveS();
+  const url=(localStorage.getItem(UKEY)||'').trim();
+  if(url){
+    const p=new URLSearchParams({
+      date:fmtShort(s.date),task:s.task,domain:s.domain,novelty:s.novelty,stakes:s.stakes,
+      complexity:s.complexity,prediction:s.prediction,confidence:s.confidence,loop:s.loop,
+      clarity:s.clarity||'',anxiety:s.anxiety||'',phrase:s.phrase||'',outcome:s.outcome,
+      quality:s.quality,time:s.time,expected_time:s.expected_time,pace_ok:s.pace_ok,reflection:s.reflection
+    }).toString();
+    try{
+      await fetch(url+'?'+p,{method:'GET',mode:'no-cors'});
+      showSt('after-status','ok','Session completed ✓ and submitted to Google Sheets.');
+    }catch(e){
+      showSt('after-status','err','Saved locally but could not reach Google Sheets — check your URL.');
+    }
+  } else {
+    showSt('after-status','ok','Session completed ✓ — no Sheets URL set, saved locally only.');
+  }
+  selAft=null;
+  document.getElementById('after-form').style.display='none';
+  buildFilter('aft-filter'); renderAfterList();
+  buildFilter('dur-filter');
+}
+function cancelAfter(){ selAft=null; document.getElementById('after-form').style.display='none'; renderAfterList(); }
+
+// ══════════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════════
+function showSt(id,type,msg){
+  const el=document.getElementById(id);
+  el.className='status '+type; el.textContent=msg;
+  if(type==='ok') setTimeout(()=>{ if(el.textContent===msg) el.className='status'; },7000);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  loadS(); loadUrl(); calcCx(); initChips();
+});
+</script>
+</body>
+</html>
