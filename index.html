@@ -6,191 +6,355 @@
 <title>Session Tracker — B3 & B3a</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink:#0f0e0c; --ink-2:#3a3832; --ink-3:#7a7670;
-  --paper:#f5f2ec; --paper-2:#ece9e1; --paper-3:#e0ddd4;
-  --accent:#1a3a2a; --accent-l:#e6f0ea;
-  --red:#c8452a; --red-l:#fce8e4;
-  --gold:#b8860b; --gold-l:#fdf3d8;
-  --line:#d0cdc4; --r:6px;
-  --green:#0b5e30; --green-l:#e6f4ee;
+:root{
+  --ink:#0f0e0c;--ink-2:#3a3832;--ink-3:#7a7670;
+  --paper:#f5f2ec;--paper-2:#ece9e1;--paper-3:#e0ddd4;
+  --accent:#1a3a2a;--accent-l:#e6f0ea;
+  --red:#c8452a;--red-l:#fce8e4;
+  --gold:#b8860b;--gold-l:#fdf3d8;
+  --green:#0b5e30;--green-l:#e6f4ee;
+  --blue:#1a4a7a;--blue-l:#e6eef8;
+  --line:#d0cdc4;--r:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:'Instrument Sans',sans-serif;min-height:100vh}
 
-.hdr{background:var(--accent);color:var(--paper);padding:1.75rem 2rem 1.5rem;border-bottom:3px solid var(--ink)}
-.hdr-eye{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8ab9a0;margin-bottom:.4rem}
-.hdr h1{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:400;color:#f0edea;line-height:1.1}
-.hdr-sub{font-size:12px;color:#8ab9a0;margin-top:.4rem;line-height:1.5}
+/* HEADER */
+.hdr{background:var(--accent);padding:1.5rem 1.75rem 1.25rem;border-bottom:3px solid var(--ink)}
+.hdr-eye{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8ab9a0;margin-bottom:.3rem}
+.hdr h1{font-family:'DM Serif Display',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:400;color:#f0edea;line-height:1.1}
+.hdr-sub{font-size:12px;color:#8ab9a0;margin-top:.3rem;line-height:1.5}
+.sync-pill{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;margin-top:.6rem;padding:3px 10px;border-radius:10px;background:rgba(138,185,160,.15);color:#8ab9a0}
+.sync-pill.ok{background:rgba(138,185,160,.2);color:#a8d4bc}
+.sync-pill.err{background:rgba(200,69,42,.2);color:#f5a090;cursor:pointer}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:2px solid var(--ink)}
-.tab-btn{background:var(--paper-2);border:none;border-right:1px solid var(--line);padding:.9rem .4rem .75rem;cursor:pointer;text-align:center;transition:background .15s;position:relative}
+/* TABS — 4 tabs now */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--ink)}
+.tab-btn{background:var(--paper-2);border:none;border-right:1px solid var(--line);padding:.75rem .25rem .6rem;cursor:pointer;text-align:center;transition:background .15s;position:relative}
 .tab-btn:last-child{border-right:none}
 .tab-btn.active{background:var(--paper);border-bottom:3px solid var(--accent);margin-bottom:-2px;z-index:2}
-.tab-btn .tnum{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+.tnum{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1px}
 .tab-btn.active .tnum{color:var(--accent)}
-.tab-btn .tlabel{font-family:'DM Serif Display',serif;font-size:clamp(.85rem,2.5vw,1.05rem);color:var(--ink-2);display:block}
+.tlabel{font-family:'DM Serif Display',serif;font-size:clamp(.78rem,2vw,.95rem);color:var(--ink-2);display:block}
 .tab-btn.active .tlabel{color:var(--ink)}
-.tab-btn .tsub{font-size:11px;color:var(--ink-3);display:block;margin-top:1px}
+.tsub{font-size:10px;color:var(--ink-3);display:block;margin-top:1px}
 
-.content{max-width:640px;margin:0 auto;padding:1.75rem 1.25rem 4rem}
+/* CONTENT */
+.content{max-width:640px;margin:0 auto;padding:1.5rem 1.1rem 4rem}
 .panel{display:none}.panel.active{display:block}
 
-.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.35rem;margin-bottom:1.1rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.card-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+/* CARD */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
 .card-title::after{content:'';flex:1;height:1px;background:var(--line)}
+.card.retro{border-left:3px solid var(--blue)}
+.card.retro .card-title{color:var(--blue)}
 
-.field{margin-bottom:1rem}.field:last-child{margin-bottom:0}
-.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:.35rem}
-.hint{font-size:11px;color:var(--ink-3);margin-bottom:.35rem;line-height:1.4}
-input[type=text],input[type=number],textarea,select{width:100%;padding:.5rem .7rem;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--r);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none}
+/* FIELDS */
+.field{margin-bottom:.9rem}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:.3rem}
+.hint{font-size:11px;color:var(--ink-3);margin-bottom:.3rem;line-height:1.4}
+input[type=text],input[type=number],textarea,select{width:100%;padding:.48rem .65rem;font-size:13px;font-family:'Instrument Sans',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--r);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none}
 input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,58,42,.1);background:#fff}
-textarea{resize:vertical;min-height:56px;line-height:1.5}
+textarea{resize:vertical;min-height:52px;line-height:1.5}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-/* CHIPS — data-val based selection, no onclick string matching */
-.chip-group{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
-.chip{padding:.35rem .8rem;border:1px solid var(--line);border-radius:20px;font-size:12px;cursor:pointer;background:var(--paper);color:var(--ink-2);transition:all .12s;white-space:nowrap;-webkit-user-select:none;user-select:none;border:1px solid var(--line)}
+/* CHIPS */
+.chip-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.chip{padding:.3rem .75rem;border:1px solid var(--line);border-radius:20px;font-size:12px;cursor:pointer;background:var(--paper);color:var(--ink-2);transition:all .12s;white-space:nowrap;-webkit-user-select:none;user-select:none}
 .chip:hover{border-color:var(--accent)}
 .chip.c-neutral{background:var(--accent);color:#fff;border-color:var(--accent)}
 .chip.c-good{background:var(--green);color:#fff;border-color:var(--green)}
 .chip.c-warn{background:var(--gold);color:#fff;border-color:var(--gold)}
 .chip.c-bad{background:var(--red);color:#fff;border-color:var(--red)}
+.chip.c-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-/* RATING STRIPS */
-.r-strip{display:flex;gap:5px;margin-top:2px}
-.r-btn{flex:1;padding:.45rem 0;border:1px solid var(--line);border-radius:4px;background:var(--paper);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;text-align:center;transition:all .12s;color:var(--ink-2)}
+/* RATING STRIP */
+.r-strip{display:flex;gap:4px;margin-top:2px}
+.r-btn{flex:1;padding:.42rem 0;border:1px solid var(--line);border-radius:4px;background:var(--paper);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;text-align:center;transition:all .12s;color:var(--ink-2)}
 .r-btn:hover{border-color:var(--accent)}
 .r-btn.r-sel{background:var(--accent);color:#fff;border-color:var(--accent)}
-.r-val{font-size:11px;color:var(--ink-3);margin-top:.3rem;font-family:'DM Mono',monospace;text-align:center;min-height:1em}
+.r-val{font-size:11px;color:var(--ink-3);margin-top:.25rem;font-family:'DM Mono',monospace;text-align:center;min-height:1em}
 
 /* COMPLEXITY */
 .cx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cx-score{grid-column:span 2;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:.7rem 1rem;display:flex;align-items:center;gap:.9rem}
-.cx-num{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--accent);line-height:1;min-width:2.2rem;text-align:center}
+.cx-score-box{grid-column:span 2;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:.65rem .9rem;display:flex;align-items:center;gap:.85rem}
+.cx-num{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--accent);line-height:1;min-width:2rem;text-align:center}
 .cx-lbl{font-size:12px;color:var(--ink-2);line-height:1.5;flex:1}
 .cx-time{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;margin-top:2px}
 
 /* INTERRUPT */
-.interrupt{background:var(--paper-2);border-left:4px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:.85rem 1rem;font-family:'DM Serif Display',serif;font-style:italic;font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:.7rem}
+.interrupt{background:var(--paper-2);border-left:4px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:.8rem .9rem;font-family:'DM Serif Display',serif;font-style:italic;font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:.65rem}
 
 /* PACE */
-.pace-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:.65rem 1rem;display:flex;align-items:center;gap:.9rem;margin-top:.5rem}
-.pace-icon{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--accent);min-width:2rem;text-align:center}
-.pace-lbl{font-size:12px;color:var(--ink-2);line-height:1.5}
-.pace-dtl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;margin-top:2px}
+.pace-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:.6rem .9rem;display:flex;align-items:center;gap:.8rem;margin-top:.45rem}
+.pace-icon{font-size:1.4rem;min-width:1.8rem;text-align:center}
+.pace-lbl{font-size:12px;color:var(--ink-2);line-height:1.4}
+.pace-dtl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;margin-top:1px}
 
-/* PENDING LIST */
-.pending-hdr{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+/* SESSION LIST */
+.pending-hdr{display:flex;align-items:center;gap:8px;margin-bottom:.7rem;flex-wrap:wrap}
 .pending-hdr label{font-size:12px;font-weight:600;color:var(--ink-2)}
-.pending-hdr select{width:auto;font-size:12px;padding:.3rem .6rem}
+.pending-hdr select{width:auto;font-size:12px;padding:.28rem .55rem}
 .empty-state{font-size:13px;color:var(--ink-3);padding:1.25rem 0;text-align:center;font-style:italic}
-.si{border:1px solid var(--line);border-radius:var(--r);padding:.85rem 1rem;margin-bottom:.6rem;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.loading-state{font-size:13px;color:var(--ink-3);padding:1.25rem 0;text-align:center;font-family:'DM Mono',monospace;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+.si{border:1px solid var(--line);border-radius:var(--r);padding:.8rem .95rem;margin-bottom:.55rem;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .si:hover{border-color:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.06)}
 .si.selected{border-color:var(--accent);border-width:2px;background:var(--accent-l)}
+.si.retro-item{border-left:3px solid var(--blue)}
 .si-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
-.si-task{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
-.si-date{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;white-space:nowrap}
-.si-meta{font-size:11px;color:var(--ink-3);margin-top:4px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.si-pred{font-size:12px;color:var(--ink-2);margin-top:5px;font-style:italic;border-left:2px solid var(--line);padding-left:.5rem;line-height:1.4}
-.badge{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'DM Mono',monospace;font-weight:500}
+.si-task{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;flex:1}
+.si-date{font-size:10px;color:var(--ink-3);font-family:'DM Mono',monospace;white-space:nowrap}
+.si-meta{font-size:11px;color:var(--ink-3);margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.si-pred{font-size:12px;color:var(--ink-2);margin-top:4px;font-style:italic;border-left:2px solid var(--line);padding-left:.45rem;line-height:1.4}
+.badge{display:inline-flex;align-items:center;font-size:10px;padding:2px 6px;border-radius:8px;font-family:'DM Mono',monospace;font-weight:500}
 .bd{background:var(--accent-l);color:var(--accent)}
 .bc{background:var(--gold-l);color:var(--gold)}
 .bk{background:var(--paper-3);color:var(--ink-2)}
 .bg{background:var(--green-l);color:var(--green)}
+.bb{background:var(--blue-l);color:var(--blue)}
 
-.sel-box{background:var(--accent-l);border:1px solid #a8c9b8;border-radius:var(--r);padding:1rem;margin-bottom:1rem}
-.sel-box-title{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:.35rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
-.sel-box-task{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:.25rem}
-.sel-box-pred{font-size:12px;color:var(--ink-2);font-style:italic;border-left:3px solid var(--accent);padding-left:.5rem;margin-top:.35rem;line-height:1.5}
+/* SELECTED SESSION BOX */
+.sel-box{background:var(--accent-l);border:1px solid #a8c9b8;border-radius:var(--r);padding:.9rem;margin-bottom:.9rem}
+.sel-box-eye{font-size:10px;font-weight:600;color:var(--accent);margin-bottom:.3rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.sel-box-task{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:.2rem}
+.sel-box-pred{font-size:12px;color:var(--ink-2);font-style:italic;border-left:3px solid var(--accent);padding-left:.45rem;margin-top:.3rem;line-height:1.5}
+.sel-box.retro-sel{background:var(--blue-l);border-color:#a8b8d4}
+.sel-box.retro-sel .sel-box-eye{color:var(--blue)}
+.sel-box.retro-sel .sel-box-pred{border-left-color:var(--blue)}
+
+/* INTENT MISMATCH */
+.intent-box{background:var(--blue-l);border:1px solid #a8b8d4;border-radius:var(--r);padding:.9rem;margin-bottom:.9rem}
+.intent-box-title{font-size:11px;font-weight:600;color:var(--blue);margin-bottom:.4rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
 
 /* BTNS */
-.btn-row{display:flex;gap:.65rem;margin-top:1.25rem;align-items:center;flex-wrap:wrap}
-.btn{padding:.65rem 1.25rem;border-radius:var(--r);border:1px solid var(--line);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
+.btn-row{display:flex;gap:.6rem;margin-top:1.1rem;align-items:center;flex-wrap:wrap}
+.btn{padding:.6rem 1.15rem;border-radius:var(--r);border:1px solid var(--line);font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#0f2518}
 .btn-secondary{background:var(--paper);color:var(--ink-2)}.btn-secondary:hover{background:var(--paper-3)}
 .btn-complete{background:var(--green);color:#fff;border-color:var(--green)}.btn-complete:hover{background:#083d1e}
+.btn-retro{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-retro:hover{background:#102d50}
 
-.status{font-size:13px;padding:.55rem .85rem;border-radius:var(--r);margin-top:.65rem;display:none;line-height:1.4}
+/* STATUS */
+.status{font-size:13px;padding:.5rem .8rem;border-radius:var(--r);margin-top:.6rem;display:none;line-height:1.4}
 .status.ok{background:var(--green-l);color:var(--green);display:block}
 .status.err{background:var(--red-l);color:var(--red);display:block}
+.status.info{background:var(--blue-l);color:var(--blue);display:block}
 
-.setup-box{background:#fff;border:1.5px dashed var(--line);border-radius:var(--r);padding:1.35rem;margin-bottom:1.25rem}
-.setup-title{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-bottom:.5rem}
-.setup-steps{font-size:12px;color:var(--ink-2);line-height:2;counter-reset:steps;list-style:none;padding:0}
-.setup-steps li{counter-increment:steps;padding-left:1.6rem;position:relative;margin-bottom:.1rem}
-.setup-steps li::before{content:counter(steps);position:absolute;left:0;font-family:'DM Mono',monospace;font-size:9px;background:var(--accent);color:#fff;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;top:3px}
-.setup-steps code{font-family:'DM Mono',monospace;font-size:10px;background:var(--paper-2);padding:1px 5px;border-radius:3px;color:var(--red)}
-.url-field{width:100%;margin-top:.65rem;padding:.5rem .7rem;font-family:'DM Mono',monospace;font-size:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);color:var(--ink-2)}
-pre.scode{margin-top:.65rem;background:var(--ink);padding:1rem;border-radius:var(--r);font-size:10px;font-family:'DM Mono',monospace;overflow-x:auto;line-height:1.7;white-space:pre-wrap;color:#c8e6c0}
-details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:600;margin-top:.75rem}
+/* SETUP MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:var(--r);padding:1.5rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h2{font-family:'DM Serif Display',serif;font-size:1.25rem;margin-bottom:.5rem;color:var(--ink)}
+.modal p{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:.75rem}
+.modal-steps{list-style:none;padding:0;counter-reset:msteps}
+.modal-steps li{counter-increment:msteps;padding:.4rem 0 .4rem 1.8rem;position:relative;font-size:13px;color:var(--ink-2);line-height:1.6;border-bottom:1px solid var(--line)}
+.modal-steps li:last-child{border-bottom:none}
+.modal-steps li::before{content:counter(msteps);position:absolute;left:0;font-family:'DM Mono',monospace;font-size:9px;background:var(--accent);color:#fff;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;top:7px}
+.modal-steps code{font-family:'DM Mono',monospace;font-size:10px;background:var(--paper-2);padding:1px 4px;border-radius:3px;color:var(--red)}
+pre.mcode{background:var(--ink);color:#c8e6c0;font-family:'DM Mono',monospace;font-size:10px;padding:.9rem;border-radius:var(--r);overflow-x:auto;line-height:1.7;white-space:pre-wrap;margin:.5rem 0}
+.url-input-row{display:flex;gap:.5rem;margin-top:.5rem}
+.url-input-row input{flex:1;padding:.45rem .65rem;font-family:'DM Mono',monospace;font-size:11px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);color:var(--ink-2)}
 
-.prog{display:flex;gap:5px;margin-bottom:1.25rem;align-items:center}
-.pdot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .2s}
-.pdot.done{background:var(--accent)}.pdot.cur{background:var(--red)}
-.prog-lbl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;letter-spacing:.06em;margin-left:4px}
+/* PROGRESS */
+.prog{display:flex;gap:4px;margin-bottom:1.1rem;align-items:center}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s}
+.pdot.done{background:var(--accent)}.pdot.cur{background:var(--red)}.pdot.retro{background:var(--blue)}
+.prog-lbl{font-size:11px;color:var(--ink-3);font-family:'DM Mono',monospace;letter-spacing:.05em;margin-left:4px}
 
-@media(max-width:500px){
-  .hdr{padding:1.25rem 1rem 1.1rem}
-  .content{padding:1.25rem .9rem 3rem}
-  .cx-grid{grid-template-columns:1fr}.cx-score{grid-column:1}
-  .tab-btn .tsub{display:none}
+@media(max-width:480px){
+  .hdr{padding:1.1rem .9rem 1rem}
+  .content{padding:1.1rem .85rem 3rem}
+  .cx-grid{grid-template-columns:1fr}.cx-score-box{grid-column:1}
+  .tsub{display:none}
+  .r2,.r3{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════ SETUP MODAL ════════════════════════════════ -->
+<div class="modal-overlay hidden" id="setup-modal">
+  <div class="modal">
+    <h2>Connect to Google Sheets</h2>
+    <p>This takes about 10 minutes once. After setup, every device that opens this URL shares the same sessions — no repeat configuration needed.</p>
+    <ol class="modal-steps">
+      <li>Create a new Google Sheet. Name it <code>Session Log</code></li>
+      <li>Add three tabs (sheets) named exactly: <code>Session Log</code> &nbsp;<code>Sessions</code> &nbsp;<code>Config</code></li>
+      <li>In <strong>Session Log</strong> row 1 paste:<br><code>Date | Task | Domain | Novelty | Stakes | Complexity | Prediction | Confidence | Loop | Clarity | Anxiety | Phrase | Outcome | Quality | Time | Expected Time | Pace OK | Intent Match | Reflection</code></li>
+      <li>In <strong>Sessions</strong> row 1 paste:<br><code>id | date | status | task | domain | novelty | stakes | complexity | expected_time | prediction | confidence | loop | clarity | anxiety | phrase | outcome | outcome_note | quality | time | pace_ok | intent_match | intent_note | reflection | type</code></li>
+      <li>In <strong>Config</strong> cell A1 type: <code>script_url</code> &nbsp; leave B1 empty for now</li>
+      <li>Go to <strong>Extensions → Apps Script</strong>, delete all existing code, paste the script below, save</li>
+      <li>Click <strong>Deploy → New deployment → Web app → Execute as: Me → Who has access: Anyone → Deploy</strong></li>
+      <li>Copy the Web App URL and paste it here:</li>
+    </ol>
+    <pre class="mcode">function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var action = e.parameter.action || 'log';
+
+  if (action === 'ping') {
+    return json({status:'ok'});
+  }
+
+  if (action === 'getUrl') {
+    var cfg = ss.getSheetByName('Config');
+    var url = cfg ? cfg.getRange('B1').getValue() : '';
+    return json({url: url});
+  }
+
+  if (action === 'setUrl') {
+    var cfg = ss.getSheetByName('Config');
+    if (cfg) cfg.getRange('B1').setValue(e.parameter.url);
+    return json({status:'ok'});
+  }
+
+  if (action === 'getSessions') {
+    var sh = ss.getSheetByName('Sessions');
+    if (!sh || sh.getLastRow() < 2) return json({sessions:[]});
+    var data = sh.getRange(2, 1, sh.getLastRow()-1, sh.getLastColumn()).getValues();
+    var headers = sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+    var sessions = data.map(function(row) {
+      var obj = {};
+      headers.forEach(function(h,i){ obj[h] = row[i]; });
+      return obj;
+    });
+    return json({sessions: sessions});
+  }
+
+  if (action === 'upsertSession') {
+    var sh = ss.getSheetByName('Sessions');
+    var headers = sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+    var p = e.parameter;
+    var id = p.id;
+    // find existing row
+    var found = -1;
+    if (sh.getLastRow() > 1) {
+      var ids = sh.getRange(2,1,sh.getLastRow()-1,1).getValues();
+      for (var i=0; i<ids.length; i++) {
+        if (ids[i][0] == id) { found = i+2; break; }
+      }
+    }
+    var row = headers.map(function(h){ return p[h] !== undefined ? p[h] : ''; });
+    if (found > 0) {
+      sh.getRange(found, 1, 1, row.length).setValues([row]);
+    } else {
+      sh.appendRow(row);
+    }
+    return json({status:'ok'});
+  }
+
+  if (action === 'completeSession') {
+    // write to Session Log (permanent record)
+    var log = ss.getSheetByName('Session Log') || ss.getActiveSheet();
+    var p = e.parameter;
+    log.appendRow([
+      p.date, p.task, p.domain, p.novelty, p.stakes,
+      p.complexity, p.prediction, p.confidence, p.loop,
+      p.clarity, p.anxiety, p.phrase, p.outcome,
+      p.quality, p.time, p.expected_time, p.pace_ok,
+      p.intent_match, p.reflection
+    ]);
+    // remove from Sessions tab
+    var sh = ss.getSheetByName('Sessions');
+    if (sh && sh.getLastRow() > 1) {
+      var ids = sh.getRange(2,1,sh.getLastRow()-1,1).getValues();
+      for (var i=ids.length-1; i>=0; i--) {
+        if (ids[i][0] == p.id) { sh.deleteRow(i+2); break; }
+      }
+    }
+    return json({status:'ok'});
+  }
+
+  return json({error:'unknown action'});
+}
+
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+    <div class="url-input-row">
+      <input type="text" id="modal-url-input" placeholder="https://script.google.com/macros/s/…/exec">
+      <button class="btn btn-primary" onclick="saveUrlFromModal()">Save & connect</button>
+    </div>
+    <div id="modal-status" class="status" style="margin-top:.5rem"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HEADER ══════════════════════════════════════ -->
 <div class="hdr">
   <div class="hdr-eye">B3 · B3a — Unified tracker</div>
   <h1>Session Intelligence Log</h1>
-  <p class="hdr-sub">Before · During · After — each phase is independent. Sessions persist across time gaps.</p>
+  <p class="hdr-sub">Before · During · After · Retrospective — sessions sync across all devices.</p>
+  <div class="sync-pill unset" id="sync-pill" onclick="openSetup()">
+    <span class="sync-dot"></span><span id="sync-label">Not connected — tap to set up</span>
+  </div>
 </div>
 
+<!-- ═══════════════════ TABS ════════════════════════════════════════ -->
 <div class="tabs">
   <button class="tab-btn active" onclick="showTab('before')" id="tab-before">
-    <span class="tnum">Phase 01</span><span class="tlabel">Before</span><span class="tsub">Setup &amp; predict</span>
+    <span class="tnum">01</span><span class="tlabel">Before</span><span class="tsub">Plan &amp; predict</span>
   </button>
   <button class="tab-btn" onclick="showTab('during')" id="tab-during">
-    <span class="tnum">Phase 02</span><span class="tlabel">During</span><span class="tsub">Mid-session check</span>
+    <span class="tnum">02</span><span class="tlabel">During</span><span class="tsub">Check-in</span>
   </button>
   <button class="tab-btn" onclick="showTab('after')" id="tab-after">
-    <span class="tnum">Phase 03</span><span class="tlabel">After</span><span class="tsub">Score &amp; close</span>
+    <span class="tnum">03</span><span class="tlabel">After</span><span class="tsub">Score &amp; close</span>
+  </button>
+  <button class="tab-btn" onclick="showTab('retro')" id="tab-retro">
+    <span class="tnum">04</span><span class="tlabel">Retro</span><span class="tsub">Log in hindsight</span>
   </button>
 </div>
 
 <div class="content">
 
-<!-- ════════════════════════════════════════════ BEFORE -->
+<!-- ══════════════════════════════════════════════════ BEFORE -->
 <div class="panel active" id="panel-before">
-  <div class="prog"><div class="pdot cur"></div><div class="pdot"></div><div class="pdot"></div><span class="prog-lbl">step 1 of 3</span></div>
+  <div class="prog"><div class="pdot cur"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div><span class="prog-lbl">step 1 of 3 — structured session</span></div>
 
   <div class="card">
     <div class="card-title">Task</div>
     <div class="field">
       <label>What is this session about?</label>
-      <div class="hint">One line — enough to identify it later when you return.</div>
+      <div class="hint">One line — enough to identify it when you return hours or days later.</div>
       <textarea id="b-task" rows="2" placeholder="e.g. Draft the client proposal response…"></textarea>
     </div>
-    <div class="field">
-      <label>Domain</label>
-      <select id="b-domain">
-        <option value="people">People / relationships</option>
-        <option value="strategy">Strategy / direction</option>
-        <option value="execution">Execution / process</option>
-        <option value="technical">Technical / analytical</option>
-        <option value="creative">Creative / taste</option>
-      </select>
+    <div class="r2">
+      <div class="field">
+        <label>Domain</label>
+        <select id="b-domain">
+          <option value="people">People / relationships</option>
+          <option value="strategy">Strategy / direction</option>
+          <option value="execution">Execution / process</option>
+          <option value="technical">Technical / analytical</option>
+          <option value="creative">Creative / taste</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Session type</label>
+        <select id="b-type">
+          <option value="structured">Structured task</option>
+          <option value="conversation">Conversation / meeting</option>
+          <option value="decision">Decision</option>
+          <option value="personal">Personal situation</option>
+        </select>
+      </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">Complexity tax (B3a)</div>
-    <div class="hint" style="margin-bottom:.75rem">Rate the problem before rating yourself. This gives you a reference point when it takes time.</div>
+    <div class="hint" style="margin-bottom:.7rem">Rate the problem before rating yourself. This is your reference point when it takes time.</div>
     <div class="cx-grid">
       <div class="field">
         <label>Novelty</label>
-        <select id="b-novelty" onchange="calcCx()">
-          <option value="1">1 — Familiar ground</option>
+        <select id="b-novelty" onchange="calcCx('b')">
+          <option value="1">1 — Familiar</option>
           <option value="2">2 — Mostly familiar</option>
           <option value="3">3 — Mixed</option>
           <option value="4">4 — Mostly new</option>
@@ -199,7 +363,7 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
       </div>
       <div class="field">
         <label>Stakes</label>
-        <select id="b-stakes" onchange="calcCx()">
+        <select id="b-stakes" onchange="calcCx('b')">
           <option value="1">1 — Low / reversible</option>
           <option value="2">2</option>
           <option value="3">3 — Medium</option>
@@ -207,22 +371,22 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
           <option value="5">5 — High / hard to undo</option>
         </select>
       </div>
-      <div class="cx-score">
-        <div class="cx-num" id="cx-score">1</div>
-        <div><div class="cx-lbl" id="cx-lbl">Very low — move quickly.</div><div class="cx-time" id="cx-time">Expected: 10–20 min</div></div>
+      <div class="cx-score-box">
+        <div class="cx-num" id="b-cx-score">1</div>
+        <div><div class="cx-lbl" id="b-cx-lbl">Very low — move quickly.</div><div class="cx-time" id="b-cx-time">Expected: 10–20 min</div></div>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">Confidence prediction (B3)</div>
+    <div class="card-title">Prediction (B3)</div>
     <div class="field">
-      <label>What do you predict will happen / what is your conclusion?</label>
+      <label>What do you predict will happen?</label>
       <div class="hint">Commit before you know the outcome. This commitment is what makes B3 work.</div>
-      <textarea id="b-prediction" rows="2" placeholder="e.g. I think the client will push back on pricing but accept the timeline…"></textarea>
+      <textarea id="b-prediction" rows="2" placeholder="e.g. I think the client will push back on pricing…"></textarea>
     </div>
     <div class="field">
-      <label>How confident are you right now? (1 = very uncertain → 5 = very sure)</label>
+      <label>Confidence (1 = very uncertain → 5 = very sure)</label>
       <div class="r-strip" id="strip-conf">
         <button class="r-btn" onclick="setRating('conf',1)">1</button>
         <button class="r-btn" onclick="setRating('conf',2)">2</button>
@@ -248,24 +412,25 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="saveSession()">Save &amp; start session →</button>
+    <button class="btn btn-primary" onclick="saveSession()">Save &amp; start →</button>
   </div>
   <div id="before-status" class="status"></div>
 </div>
 
-<!-- ════════════════════════════════════════════ DURING -->
+<!-- ══════════════════════════════════════════════════ DURING -->
 <div class="panel" id="panel-during">
-  <div class="prog"><div class="pdot done"></div><div class="pdot cur"></div><div class="pdot"></div><span class="prog-lbl">step 2 of 3 — optional</span></div>
+  <div class="prog"><div class="pdot done"></div><div class="pdot cur"></div><div class="pdot"></div><div class="pdot"></div><span class="prog-lbl">step 2 of 3 — optional</span></div>
 
-  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1.1rem;line-height:1.6">Select an open session to log a mid-session check-in. Skip entirely if you are in flow — do not interrupt good thinking.</p>
+  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1rem;line-height:1.6">Select an open session to log a mid-session check-in. Skip if you are in flow — do not interrupt good thinking.</p>
 
   <div class="card">
     <div class="card-title">Open sessions</div>
     <div class="pending-hdr">
       <label>Filter:</label>
-      <select id="dur-filter" onchange="renderDuringList()"><option value="all">All months</option></select>
+      <select id="dur-filter" onchange="renderList('during')"><option value="all">All months</option></select>
+      <button class="btn btn-secondary" style="font-size:11px;padding:.25rem .6rem" onclick="loadSessions('during')">↻ Refresh</button>
     </div>
-    <div id="during-list"></div>
+    <div id="during-list"><div class="loading-state">Loading sessions…</div></div>
   </div>
 
   <div id="during-form" style="display:none">
@@ -273,7 +438,7 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
     <div class="card">
       <div class="card-title">Mid-session check-in</div>
       <div class="field">
-        <label>Anxiety about pace — mid-session level (1 = none → 5 = strong)</label>
+        <label>Anxiety about pace (1 = none → 5 = strong loop running)</label>
         <div class="r-strip" id="strip-anx">
           <button class="r-btn" onclick="setRating('anx',1)">1</button>
           <button class="r-btn" onclick="setRating('anx',2)">2</button>
@@ -299,32 +464,59 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
           <button class="chip" data-val="partial">Yes — partial</button>
         </div>
       </div>
+      <div class="field">
+        <label>Is the situation unfolding as you expected?</label>
+        <div class="chip-group" id="chips-intent-mid">
+          <button class="chip" data-val="yes">Yes — as expected</button>
+          <button class="chip" data-val="partial">Partially</button>
+          <button class="chip" data-val="no">No — something shifted</button>
+        </div>
+      </div>
     </div>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="saveDuring()">Save check-in</button>
-      <button class="btn btn-secondary" onclick="cancelDuring()">Cancel</button>
+      <button class="btn btn-secondary" onclick="cancelSel('during')">Cancel</button>
     </div>
     <div id="during-status" class="status"></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ AFTER -->
+<!-- ══════════════════════════════════════════════════ AFTER -->
 <div class="panel" id="panel-after">
-  <div class="prog"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot cur"></div><span class="prog-lbl">step 3 of 3</span></div>
+  <div class="prog"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot cur"></div><div class="pdot"></div><span class="prog-lbl">step 3 of 3</span></div>
 
-  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1.1rem;line-height:1.6">Select an open session to score and close. Completing removes it from all pending lists and submits to Google Sheets.</p>
+  <p style="font-size:13px;color:var(--ink-3);margin-bottom:1rem;line-height:1.6">Select an open session to score and close. Completing submits to Google Sheets and removes it from all pending lists.</p>
 
   <div class="card">
     <div class="card-title">Open sessions</div>
     <div class="pending-hdr">
       <label>Filter:</label>
-      <select id="aft-filter" onchange="renderAfterList()"><option value="all">All months</option></select>
+      <select id="aft-filter" onchange="renderList('after')"><option value="all">All months</option></select>
+      <button class="btn btn-secondary" style="font-size:11px;padding:.25rem .6rem" onclick="loadSessions('after')">↻ Refresh</button>
     </div>
-    <div id="after-list"></div>
+    <div id="after-list"><div class="loading-state">Loading sessions…</div></div>
   </div>
 
   <div id="after-form" style="display:none">
     <div class="sel-box" id="aft-sel-box"></div>
+
+    <!-- Intent match — key for personal / conversation scenarios -->
+    <div class="card">
+      <div class="card-title">Intent match (C1 data)</div>
+      <div class="field">
+        <label>Did this unfold as you expected?</label>
+        <div class="chip-group" id="chips-intent">
+          <button class="chip" data-val="yes">Yes — as expected</button>
+          <button class="chip" data-val="partial">Partially</button>
+          <button class="chip" data-val="no">No — misread</button>
+        </div>
+      </div>
+      <div class="field" id="intent-note-wrap" style="display:none">
+        <label>What did you think this was vs. what it actually was?</label>
+        <div class="hint">e.g. "I thought this was an evaluation but they wanted encouragement" — this is your C1 calibration data.</div>
+        <textarea id="a-intent-note" rows="2" placeholder="I thought… but they actually wanted…"></textarea>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">Prediction outcome (B3)</div>
@@ -369,386 +561,691 @@ details summary{font-size:12px;cursor:pointer;color:var(--accent);font-weight:60
     </div>
 
     <div class="card">
-      <div class="card-title">One-line reflection</div>
+      <div class="card-title">Reflection</div>
       <div class="field">
         <label>What will you do differently next time? (optional)</label>
-        <textarea id="a-reflect" rows="2" placeholder="e.g. Setting the complexity score first reduced the pace anxiety immediately."></textarea>
+        <textarea id="a-reflect" rows="2" placeholder="e.g. Ask 'what do you need from me right now?' before assuming the frame…"></textarea>
       </div>
-    </div>
-
-    <div class="setup-box" id="setup-box">
-      <div class="setup-title">First time? Set up your Google Sheet</div>
-      <ol class="setup-steps">
-        <li>Create a new Google Sheet named <code>Session Log</code></li>
-        <li>Paste headers in row 1:<br><code>Date | Task | Domain | Novelty | Stakes | Complexity | Prediction | Confidence | Loop | Clarity | Anxiety | Phrase | Outcome | Quality | Time | Expected Time | Pace OK | Reflection</code></li>
-        <li>Go to <strong>Extensions → Apps Script</strong>, paste the script below, save &amp; deploy as Web App</li>
-        <li>Copy the Web App URL and paste it here:</li>
-      </ol>
-      <input type="text" class="url-field" id="sheets-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" oninput="saveUrl()">
-      <div style="margin-top:.4rem;font-size:11px;color:var(--ink-3)">Saved in this browser — configure once only.</div>
-      <details>
-        <summary>Show Apps Script code ↓</summary>
-        <pre class="scode">function doGet(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Session Log") || ss.getActiveSheet();
-  var p = e.parameter;
-  sheet.appendRow([
-    p.date, p.task, p.domain, p.novelty, p.stakes,
-    p.complexity, p.prediction, p.confidence, p.loop,
-    p.clarity, p.anxiety, p.phrase, p.outcome,
-    p.quality, p.time, p.expected_time, p.pace_ok, p.reflection
-  ]);
-  return ContentService
-    .createTextOutput(JSON.stringify({status:"ok"}))
-    .setMimeType(ContentService.MimeType.JSON);
-}</pre>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:.5rem;line-height:1.6">Deploy → New deployment → Web app → Execute as: Me → Who has access: Anyone → Copy URL.</div>
-      </details>
     </div>
 
     <div class="btn-row">
       <button class="btn btn-complete" onclick="completeSession()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-        Complete &amp; submit to Sheets
+        Complete &amp; submit
       </button>
-      <button class="btn btn-secondary" onclick="cancelAfter()">Cancel</button>
+      <button class="btn btn-secondary" onclick="cancelSel('after')">Cancel</button>
     </div>
     <div id="after-status" class="status"></div>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ RETROSPECTIVE -->
+<div class="panel" id="panel-retro">
+  <div class="prog"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot retro"></div><span class="prog-lbl">retrospective — log in one go</span></div>
+
+  <div style="background:var(--blue-l);border:1px solid #a8b8d4;border-radius:var(--r);padding:.8rem .9rem;margin-bottom:1rem;font-size:13px;color:var(--blue);line-height:1.6">
+    Use this for <strong>conversations, personal situations, and unstructured scenarios</strong> where you couldn't log Before/During in real time. Fill in everything you know now, including what you thought the situation was vs. what it turned out to be.
+  </div>
+
+  <div class="card retro">
+    <div class="card-title">What happened</div>
+    <div class="field">
+      <label>Describe the situation</label>
+      <div class="hint">What was this? A conversation, a decision, a personal interaction?</div>
+      <textarea id="r-task" rows="2" placeholder="e.g. Conversation with my wife about the weekend plans…"></textarea>
+    </div>
+    <div class="r2">
+      <div class="field">
+        <label>Domain</label>
+        <select id="r-domain">
+          <option value="people">People / relationships</option>
+          <option value="personal">Personal / self</option>
+          <option value="strategy">Strategy / direction</option>
+          <option value="execution">Execution / process</option>
+          <option value="creative">Creative / taste</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>When did this happen?</label>
+        <input type="date" id="r-date">
+      </div>
+    </div>
+  </div>
+
+  <!-- Intent mismatch — the core field for personal scenarios -->
+  <div class="intent-box">
+    <div class="intent-box-title">Intent mismatch (C1 calibration)</div>
+    <div class="field">
+      <label>What did you think the situation was?</label>
+      <textarea id="r-thought" rows="2" placeholder="e.g. I thought she was raising a problem for me to solve…"></textarea>
+    </div>
+    <div class="field">
+      <label>What did it actually turn out to be?</label>
+      <textarea id="r-actual" rows="2" placeholder="e.g. She wanted to feel heard and supported — not a solution…"></textarea>
+    </div>
+    <div class="field">
+      <label>Intent match</label>
+      <div class="chip-group" id="chips-r-intent">
+        <button class="chip" data-val="yes">Read correctly</button>
+        <button class="chip" data-val="partial">Partially right</button>
+        <button class="chip" data-val="no">Misread completely</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card retro">
+    <div class="card-title">Your prediction / assumption (B3)</div>
+    <div class="field">
+      <label>What did you assume or expect going in?</label>
+      <div class="hint">Reconstruct as honestly as possible — what was your mental model before it unfolded?</div>
+      <textarea id="r-prediction" rows="2" placeholder="e.g. I assumed the conversation would be about logistics…"></textarea>
+    </div>
+    <div class="field">
+      <label>How confident were you at the time?</label>
+      <div class="r-strip" id="strip-rconf">
+        <button class="r-btn" onclick="setRating('rconf',1)">1</button>
+        <button class="r-btn" onclick="setRating('rconf',2)">2</button>
+        <button class="r-btn" onclick="setRating('rconf',3)">3</button>
+        <button class="r-btn" onclick="setRating('rconf',4)">4</button>
+        <button class="r-btn" onclick="setRating('rconf',5)">5</button>
+      </div>
+      <div class="r-val" id="val-rconf">tap to rate</div>
+    </div>
+    <div class="field">
+      <label>Was your assumption / prediction correct?</label>
+      <div class="chip-group" id="chips-r-outcome">
+        <button class="chip" data-val="correct">Correct</button>
+        <button class="chip" data-val="partial">Partial</button>
+        <button class="chip" data-val="wrong">Wrong</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card retro">
+    <div class="card-title">Complexity &amp; quality (B3a)</div>
+    <div class="cx-grid">
+      <div class="field">
+        <label>Novelty at the time</label>
+        <select id="r-novelty" onchange="calcCx('r')">
+          <option value="1">1 — Familiar</option>
+          <option value="2">2</option>
+          <option value="3">3 — Mixed</option>
+          <option value="4">4</option>
+          <option value="5">5 — New territory</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Stakes at the time</label>
+        <select id="r-stakes" onchange="calcCx('r')">
+          <option value="1">1 — Low</option>
+          <option value="2">2</option>
+          <option value="3">3 — Medium</option>
+          <option value="4">4</option>
+          <option value="5">5 — High</option>
+        </select>
+      </div>
+      <div class="cx-score-box">
+        <div class="cx-num" id="r-cx-score">1</div>
+        <div><div class="cx-lbl" id="r-cx-lbl">Very low.</div><div class="cx-time" id="r-cx-time">Expected: 10–20 min</div></div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:.75rem">
+      <label>How well did you handle it? (1 = poorly → 5 = very well)</label>
+      <div class="r-strip" id="strip-rqual">
+        <button class="r-btn" onclick="setRating('rqual',1)">1</button>
+        <button class="r-btn" onclick="setRating('rqual',2)">2</button>
+        <button class="r-btn" onclick="setRating('rqual',3)">3</button>
+        <button class="r-btn" onclick="setRating('rqual',4)">4</button>
+        <button class="r-btn" onclick="setRating('rqual',5)">5</button>
+      </div>
+      <div class="r-val" id="val-rqual">tap to rate</div>
+    </div>
+    <div class="field">
+      <label>Was anxiety / FOMO present?</label>
+      <div class="chip-group" id="chips-r-loop">
+        <button class="chip" data-val="no">No</button>
+        <button class="chip" data-val="mild">Mild</button>
+        <button class="chip" data-val="yes">Yes — affected outcome</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card retro">
+    <div class="card-title">Learning</div>
+    <div class="field">
+      <label>What would you do differently?</label>
+      <textarea id="r-reflect" rows="2" placeholder="e.g. Ask 'what do you need from me right now?' before assuming the frame of the conversation…"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-retro" onclick="saveRetro()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      Save retrospective
+    </button>
+  </div>
+  <div id="retro-status" class="status"></div>
+</div>
+
 </div><!-- /content -->
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-//  STORAGE
-// ══════════════════════════════════════════════════════════════════
-const SKEY = 'b3_sessions_v3';
-const UKEY = 'b3_sheets_url';
-let sessions = [];
+// ═══════════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════════
+const LSURL = 'b3_script_url';
+let SCRIPT_URL = '';
+let openSessions = [];
 let selDur = null, selAft = null;
 
-function loadS(){ try{ sessions=JSON.parse(localStorage.getItem(SKEY)||'[]'); }catch(e){ sessions=[]; } }
-function saveS(){ try{ localStorage.setItem(SKEY,JSON.stringify(sessions)); }catch(e){} }
-function saveUrl(){ try{ localStorage.setItem(UKEY,document.getElementById('sheets-url').value.trim()); }catch(e){} }
-function loadUrl(){
-  try{
-    const u=localStorage.getItem(UKEY)||'';
-    if(u){ document.getElementById('sheets-url').value=u; document.getElementById('setup-box').style.display='none'; }
-  }catch(e){}
-}
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+const ratings = {conf:0, anx:0, qual:0, rconf:0, rqual:0};
+const chips = {loop:'', clarity:'', phrase:'', 'intent-mid':'', intent:'', outcome:'',
+               'r-intent':'', 'r-outcome':'', 'r-loop':''};
 
-// ══════════════════════════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════════════════════════
-function showTab(id){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.getElementById('tab-'+id).classList.add('active');
-  if(id==='during'){ buildFilter('dur-filter'); renderDuringList(); }
-  if(id==='after') { buildFilter('aft-filter'); renderAfterList(); loadUrl(); }
-}
-
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 //  COMPLEXITY
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 const CXD = {
-  1:{l:'Very low — move quickly.',t:'Expected: 10–20 min',min:10,max:30},
+  1:{l:'Very low.',t:'Expected: 10–20 min',min:10,max:30},
   2:{l:'Low.',t:'Expected: 15–30 min',min:15,max:45},
   3:{l:'Low-moderate.',t:'Expected: 20–40 min',min:20,max:60},
   4:{l:'Moderate.',t:'Expected: 30–60 min',min:30,max:90},
   5:{l:'Moderate.',t:'Expected: 40–75 min',min:40,max:110},
-  6:{l:'Medium — take your time.',t:'Expected: 45–90 min',min:45,max:135},
-  8:{l:'Complex — sustained thinking.',t:'Expected: 60–120 min',min:60,max:180},
+  6:{l:'Medium.',t:'Expected: 45–90 min',min:45,max:135},
+  8:{l:'Complex.',t:'Expected: 60–120 min',min:60,max:180},
   9:{l:'Complex.',t:'Expected: 60–120 min',min:60,max:180},
-  10:{l:'High complexity — proportional.',t:'Expected: 90–180 min',min:90,max:270},
+  10:{l:'High complexity.',t:'Expected: 90–180 min',min:90,max:270},
   12:{l:'High complexity.',t:'Expected: 2–4 hours',min:120,max:360},
-  15:{l:'Very high — half day is fine.',t:'Expected: 3–5 hours',min:180,max:480},
+  15:{l:'Very high.',t:'Expected: 3–5 hours',min:180,max:480},
   16:{l:'Very high.',t:'Expected: 3–6 hours',min:180,max:540},
   20:{l:'Exceptional.',t:'Expected: multi-session',min:360,max:9999},
-  25:{l:'Maximum complexity.',t:'Expected: sustained days',min:480,max:9999},
+  25:{l:'Maximum.',t:'Expected: sustained days',min:480,max:9999},
 };
-function getCx(score){ const keys=Object.keys(CXD).map(Number).sort((a,b)=>a-b); let d=CXD[1]; for(const k of keys){if(score>=k)d=CXD[k];} return d; }
-function calcCx(){
-  const n=+document.getElementById('b-novelty').value;
-  const s=+document.getElementById('b-stakes').value;
+function getCx(score){const keys=Object.keys(CXD).map(Number).sort((a,b)=>a-b);let d=CXD[1];for(const k of keys){if(score>=k)d=CXD[k];}return d;}
+function calcCx(prefix){
+  const n=+document.getElementById(prefix+'-novelty').value;
+  const s=+document.getElementById(prefix+'-stakes').value;
   const sc=n*s; const d=getCx(sc);
-  document.getElementById('cx-score').textContent=sc;
-  document.getElementById('cx-lbl').textContent=d.l;
-  document.getElementById('cx-time').textContent=d.t;
+  document.getElementById(prefix+'-cx-score').textContent=sc;
+  document.getElementById(prefix+'-cx-lbl').textContent=d.l;
+  document.getElementById(prefix+'-cx-time').textContent=d.t;
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 //  RATINGS
-// ══════════════════════════════════════════════════════════════════
-const RLBL = {
+// ═══════════════════════════════════════════════════════════════
+const RLBL={
   conf:{1:'Very uncertain',2:'Somewhat uncertain',3:'Moderate',4:'Fairly confident',5:'Very confident'},
-  anx: {1:'None',2:'Mild',3:'Moderate',4:'Strong',5:'Very strong'},
+  anx:{1:'None',2:'Mild',3:'Moderate',4:'Strong',5:'Very strong'},
   qual:{1:'Poor',2:'Weak',3:'Adequate',4:'Good',5:'Very strong'},
+  rconf:{1:'Very uncertain',2:'Somewhat uncertain',3:'Moderate',4:'Fairly confident',5:'Very confident'},
+  rqual:{1:'Poorly',2:'Weakly',3:'Adequately',4:'Well',5:'Very well'},
 };
-const ratings = {conf:0, anx:0, qual:0};
 function setRating(type,val){
   ratings[type]=val;
   document.querySelectorAll('#strip-'+type+' .r-btn').forEach((b,i)=>b.classList.toggle('r-sel',i<val));
   const v=document.getElementById('val-'+type);
-  if(v) v.textContent=val+' — '+(RLBL[type][val]||'');
-  if(type==='qual') showPace();
+  if(v)v.textContent=val+' — '+(RLBL[type]&&RLBL[type][val]||'');
+  if(type==='qual')showPace();
 }
 function resetRating(type){
   ratings[type]=0;
   document.querySelectorAll('#strip-'+type+' .r-btn').forEach(b=>b.classList.remove('r-sel'));
-  const v=document.getElementById('val-'+type); if(v) v.textContent='tap to rate';
+  const v=document.getElementById('val-'+type);
+  if(v)v.textContent='tap to rate';
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  CHIPS — fixed: uses data-val, no onclick string parsing
-// ══════════════════════════════════════════════════════════════════
-const chipState = {loop:'', clarity:'', phrase:'', outcome:''};
-// colour map per group per value
-const CMAP = {
-  loop:    {no:'c-good',   mild:'c-warn',    yes:'c-bad'},
-  clarity: {clear:'c-good',uncertain:'c-warn',compromised:'c-bad'},
-  phrase:  {no:'c-neutral',yes:'c-good',     partial:'c-warn'},
-  outcome: {correct:'c-good',partial:'c-warn',wrong:'c-bad',pending:'c-neutral'},
+// ═══════════════════════════════════════════════════════════════
+//  CHIPS
+// ═══════════════════════════════════════════════════════════════
+const CMAP={
+  loop:{no:'c-good',mild:'c-warn',yes:'c-bad'},
+  clarity:{clear:'c-good',uncertain:'c-warn',compromised:'c-bad'},
+  phrase:{no:'c-neutral',yes:'c-good',partial:'c-warn'},
+  'intent-mid':{yes:'c-good',partial:'c-warn',no:'c-bad'},
+  intent:{yes:'c-good',partial:'c-warn',no:'c-bad'},
+  outcome:{correct:'c-good',partial:'c-warn',wrong:'c-bad',pending:'c-neutral'},
+  'r-intent':{yes:'c-good',partial:'c-warn',no:'c-bad'},
+  'r-outcome':{correct:'c-good',partial:'c-warn',wrong:'c-bad'},
+  'r-loop':{no:'c-good',mild:'c-warn',yes:'c-bad'},
 };
-// attach chip listeners after DOM ready (not via onclick in HTML)
 function initChips(){
-  document.querySelectorAll('.chip-group').forEach(group=>{
-    const gname = group.id.replace('chips-','');
-    group.querySelectorAll('.chip').forEach(chip=>{
+  document.querySelectorAll('.chip-group').forEach(grp=>{
+    const gname=grp.id.replace('chips-','');
+    grp.querySelectorAll('.chip').forEach(chip=>{
       chip.addEventListener('click',()=>{
-        const val = chip.getAttribute('data-val');
-        chipState[gname]=val;
-        // clear all in group
-        group.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
-        // apply colour class
-        const cls=(CMAP[gname]&&CMAP[gname][val])||'c-neutral';
-        chip.classList.add(cls);
-        // side-effect: outcome note
+        const val=chip.getAttribute('data-val');
+        chips[gname]=val;
+        grp.querySelectorAll('.chip').forEach(c=>{c.className='chip';});
+        chip.classList.add((CMAP[gname]&&CMAP[gname][val])||'c-neutral');
         if(gname==='outcome'){
           document.getElementById('outcome-note-wrap').style.display=(val!=='pending')?'block':'none';
+        }
+        if(gname==='intent'){
+          document.getElementById('intent-note-wrap').style.display=(val!=='yes')?'block':'none';
         }
       });
     });
   });
 }
-function resetChips(gname){
-  chipState[gname]='';
+function resetChip(gname){
+  chips[gname]='';
   const g=document.getElementById('chips-'+gname);
-  if(g) g.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
-  if(gname==='outcome') document.getElementById('outcome-note-wrap').style.display='none';
+  if(g)g.querySelectorAll('.chip').forEach(c=>{c.className='chip';});
+  if(gname==='outcome'){document.getElementById('outcome-note-wrap').style.display='none';}
+  if(gname==='intent'){document.getElementById('intent-note-wrap').style.display='none';}
 }
-function setChipByVal(gname, val){
-  if(!val) return;
-  chipState[gname]=val;
-  const g=document.getElementById('chips-'+gname); if(!g) return;
-  g.querySelectorAll('.chip').forEach(c=>{ c.className='chip'; });
-  const chip=g.querySelector('[data-val="'+val+'"]');
-  if(chip){ const cls=(CMAP[gname]&&CMAP[gname][val])||'c-neutral'; chip.classList.add(cls); }
+function setChipByVal(gname,val){
+  if(!val)return;chips[gname]=val;
+  const g=document.getElementById('chips-'+gname);if(!g)return;
+  g.querySelectorAll('.chip').forEach(c=>{c.className='chip';});
+  const ch=g.querySelector('[data-val="'+val+'"]');
+  if(ch)ch.classList.add((CMAP[gname]&&CMAP[gname][val])||'c-neutral');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='during')loadSessions('during');
+  if(id==='after')loadSessions('after');
+  if(id==='retro'){
+    // set today's date as default
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('r-date').value=today;
+    calcCx('r');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCRIPT URL — load from Sheets Config tab on startup
+// ═══════════════════════════════════════════════════════════════
+async function initUrl(){
+  // first check localStorage cache
+  const cached=(localStorage.getItem(LSURL)||'').trim();
+  if(cached){
+    SCRIPT_URL=cached;
+    setSyncPill(true);
+    return;
+  }
+  // if no cache, show setup modal
+  openSetup();
+}
+
+function setSyncPill(ok,msg){
+  const pill=document.getElementById('sync-pill');
+  const lbl=document.getElementById('sync-label');
+  pill.className='sync-pill '+(ok?'ok':'err');
+  lbl.textContent=ok?(msg||'Connected to Google Sheets'):'Not connected — tap to set up';
+  if(!ok){pill.onclick=openSetup;}
+  else{pill.onclick=null;}
+}
+
+function openSetup(){document.getElementById('setup-modal').classList.remove('hidden');}
+function closeSetup(){document.getElementById('setup-modal').classList.add('hidden');}
+
+async function saveUrlFromModal(){
+  const url=document.getElementById('modal-url-input').value.trim();
+  if(!url){showModalSt('err','Paste the Apps Script URL first.');return;}
+  showModalSt('info','Testing connection…');
+  try{
+    const r=await apiCall({action:'ping'},url);
+    if(r&&r.status==='ok'){
+      SCRIPT_URL=url;
+      localStorage.setItem(LSURL,url);
+      setSyncPill(true);
+      // also store url in the sheet Config tab so other devices can fetch it
+      await apiCall({action:'setUrl',url});
+      showModalSt('ok','Connected ✓ — you can close this.');
+      setTimeout(closeSetup,1800);
+    } else {
+      showModalSt('err','Got a response but not the expected one. Check the script was deployed correctly.');
+    }
+  }catch(e){
+    showModalSt('err','Could not reach that URL. Check the deployment settings (Execute as: Me, Access: Anyone).');
+  }
+}
+
+function showModalSt(type,msg){
+  const el=document.getElementById('modal-status');
+  el.className='status '+type;el.textContent=msg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  API CALLS — JSONP via script tag (avoids CORS for no-cors mode)
+//  Fall back to fetch mode:no-cors for writes (fire-and-forget)
+// ═══════════════════════════════════════════════════════════════
+function apiCall(params, urlOverride){
+  const url=urlOverride||SCRIPT_URL;
+  if(!url)return Promise.reject('No URL');
+  const qs=new URLSearchParams(params).toString();
+  return new Promise((resolve,reject)=>{
+    const cbName='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    const script=document.createElement('script');
+    const timer=setTimeout(()=>{
+      delete window[cbName];document.body.removeChild(script);
+      reject(new Error('timeout'));
+    },12000);
+    // Apps Script doesn't natively support JSONP, so we use fetch with no-cors
+    // for reads we use a proxy trick via fetch — actually just use fetch with cors
+    fetch(url+'?'+qs)
+      .then(r=>r.json())
+      .then(data=>{clearTimeout(timer);resolve(data);})
+      .catch(()=>{
+        // no-cors fallback for fire-and-forget writes
+        clearTimeout(timer);
+        fetch(url+'?'+qs,{method:'GET',mode:'no-cors'})
+          .then(()=>resolve({status:'ok'}))
+          .catch(reject);
+      });
+    document.body.removeChild(script);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SESSIONS — load from Sheets
+// ═══════════════════════════════════════════════════════════════
+async function loadSessions(phase){
+  if(!SCRIPT_URL){
+    const listId=phase+'-list';
+    document.getElementById(listId).innerHTML='<div class="empty-state">Connect to Google Sheets first — see the header.</div>';
+    return;
+  }
+  const listId=phase+'-list';
+  document.getElementById(listId).innerHTML='<div class="loading-state">Loading…</div>';
+  try{
+    const data=await apiCall({action:'getSessions'});
+    openSessions=(data.sessions||[]).filter(s=>s.status==='open'||s.status==='during');
+    buildFilter(phase);
+    renderList(phase);
+  }catch(e){
+    // fall back to localStorage cache
+    try{
+      const cached=JSON.parse(localStorage.getItem('b3_sessions_cache')||'[]');
+      openSessions=cached.filter(s=>s.status==='open'||s.status==='during');
+      buildFilter(phase);renderList(phase);
+      document.getElementById(listId).innerHTML+='<div style="font-size:11px;color:var(--gold);margin-top:.4rem">Showing cached data — refresh when online.</div>';
+    }catch(e2){
+      document.getElementById(listId).innerHTML='<div class="empty-state">Could not load sessions. Check your connection.</div>';
+    }
+  }
+}
+
+function cacheLocal(){
+  try{localStorage.setItem('b3_sessions_cache',JSON.stringify(openSessions));}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FILTER + RENDER LISTS
+// ═══════════════════════════════════════════════════════════════
+function mkey(iso){
+  try{const d=new Date(iso);return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});}catch(e){return 'Unknown';}
+}
+function buildFilter(phase){
+  const selId=phase==='during'?'dur-filter':'aft-filter';
+  const sel=document.getElementById(selId);if(!sel)return;
+  const cur=sel.value;
+  const months=[...new Set(openSessions.map(s=>mkey(s.date)))].sort((a,b)=>new Date('1 '+a)-new Date('1 '+b));
+  sel.innerHTML='<option value="all">All months</option>';
+  months.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;
+}
+function renderList(phase){
+  const selId=phase==='during'?'dur-filter':'aft-filter';
+  const listId=phase+'-list';
+  const selV=(document.getElementById(selId)||{}).value||'all';
+  const selId2=phase==='during'?selDur:selAft;
+  let list=openSessions;
+  if(selV!=='all')list=list.filter(s=>mkey(s.date)===selV);
+  list=list.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const el=document.getElementById(listId);if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty-state">No open sessions — log one in Before first.</div>';return;}
+  el.innerHTML=list.map(s=>`
+    <div class="si${selId2===s.id?' selected':''}${s.type==='retro'?' retro-item':''}" onclick="selectSess('${phase}','${s.id}')">
+      <div class="si-top"><div class="si-task">${esc(s.task||'Untitled')}</div><div class="si-date">${fmtShort(s.date)}</div></div>
+      <div class="si-meta">
+        <span class="badge bd">${s.domain||'—'}</span>
+        <span class="badge bc">cx ${s.complexity||'?'}</span>
+        <span class="badge bk">conf ${s.confidence||'?'}/5</span>
+        ${s.clarity?'<span class="badge bg">check-in ✓</span>':''}
+        ${s.type==='retro'?'<span class="badge bb">retro</span>':''}
+      </div>
+      ${s.prediction?'<div class="si-pred">"'+esc(s.prediction)+'"</div>':''}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SELECT SESSION
+// ═══════════════════════════════════════════════════════════════
+function selectSess(phase,id){
+  if(phase==='during')selDur=id;
+  else selAft=id;
+  const s=openSessions.find(x=>x.id===id);
+  if(!s)return;
+  renderList(phase);
+  const boxId=phase==='during'?'dur-sel-box':'aft-sel-box';
+  const formId=phase+'-form';
+  const isRetro=s.type==='retro';
+  document.getElementById(boxId).innerHTML=`
+    <div class="sel-box-eye">${fmtFull(s.date)}${isRetro?' · retrospective':''}</div>
+    <div class="sel-box-task">${esc(s.task||'Untitled')}</div>
+    ${s.prediction?'<div class="sel-box-pred">"'+esc(s.prediction)+'"</div>':''}`;
+  if(phase==='during'){
+    resetRating('anx');resetChip('clarity');resetChip('phrase');resetChip('intent-mid');
+    if(s.anxiety)setRating('anx',+s.anxiety);
+    if(s.clarity)setChipByVal('clarity',s.clarity);
+    if(s.phrase)setChipByVal('phrase',s.phrase);
+  } else {
+    resetRating('qual');resetChip('outcome');resetChip('intent');
+    document.getElementById('a-time').value='';
+    document.getElementById('a-reflect').value='';
+    document.getElementById('a-outcome-note').value='';
+    document.getElementById('a-intent-note').value='';
+    document.getElementById('pace-wrap').style.display='none';
+    document.getElementById('outcome-note-wrap').style.display='none';
+    document.getElementById('intent-note-wrap').style.display='none';
+    document.getElementById('after-status').className='status';
+  }
+  document.getElementById(formId).style.display='block';
+}
+
+function cancelSel(phase){
+  if(phase==='during')selDur=null;
+  else selAft=null;
+  document.getElementById(phase+'-form').style.display='none';
+  renderList(phase);
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  PACE VERDICT
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 function showPace(){
   const time=+document.getElementById('a-time').value;
   const wrap=document.getElementById('pace-wrap');
-  if(!time||!selAft){ wrap.style.display='none'; return; }
-  const sess=sessions.find(s=>s.id===selAft); if(!sess){ wrap.style.display='none'; return; }
-  const d=getCx(sess.complexity);
-  const fast=time<d.min, ok=time>=d.min&&time<=d.max;
+  if(!time||!selAft){wrap.style.display='none';return;}
+  const s=openSessions.find(x=>x.id===selAft);if(!s){wrap.style.display='none';return;}
+  const d=getCx(+s.complexity||1);
+  const fast=time<d.min,ok=time>=d.min&&time<=d.max;
   document.getElementById('pace-icon').textContent=ok?'✓':fast?'↑':'→';
-  document.getElementById('pace-lbl').textContent=ok?'Proportional to complexity score.':fast?'Faster than expected — good.':'Longer than typical range — check context.';
+  document.getElementById('pace-lbl').textContent=ok?'Proportional to complexity.':fast?'Faster than expected — good.':'Longer than typical — check context.';
   document.getElementById('pace-dtl').textContent=d.t+' · Your time: '+time+' min';
   wrap.style.display='block';
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  MONTH FILTER
-// ══════════════════════════════════════════════════════════════════
-function mkey(iso){ const d=new Date(iso); return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'}); }
-function buildFilter(selId){
-  const sel=document.getElementById(selId);
-  const cur=sel.value;
-  const open=sessions.filter(s=>s.status==='open');
-  const months=[...new Set(open.map(s=>mkey(s.date)))].sort((a,b)=>new Date('1 '+a)-new Date('1 '+b));
-  sel.innerHTML='<option value="all">All months</option>';
-  months.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o); });
-  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
-}
-function filterM(list,selId){ const m=document.getElementById(selId).value; return m==='all'?list:list.filter(s=>mkey(s.date)===m); }
-
-// ══════════════════════════════════════════════════════════════════
-//  FORMAT
-// ══════════════════════════════════════════════════════════════════
-function fmtFull(iso){ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
-function fmtShort(iso){ return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 //  SAVE SESSION (Before)
-// ══════════════════════════════════════════════════════════════════
-function saveSession(){
+// ═══════════════════════════════════════════════════════════════
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmtShort(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return iso;}}
+function fmtFull(iso){try{return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function saveSession(){
   const task=document.getElementById('b-task').value.trim();
   const pred=document.getElementById('b-prediction').value.trim();
-  if(!task){ showSt('before-status','err','Add a task description.'); return; }
-  if(!pred){ showSt('before-status','err','Add your prediction before starting.'); return; }
-  if(!ratings.conf){ showSt('before-status','err','Rate your confidence (1–5).'); return; }
-  const n=+document.getElementById('b-novelty').value, s=+document.getElementById('b-stakes').value, cx=n*s;
-  sessions.push({
-    id:uid(), date:new Date().toISOString(),
-    task, domain:document.getElementById('b-domain').value,
-    novelty:n, stakes:s, complexity:cx, expected_time:getCx(cx).t,
-    prediction:pred, confidence:ratings.conf, loop:chipState.loop||'not-recorded',
-    clarity:'', anxiety:'', phrase:'',
-    outcome:'', outcome_note:'', quality:'', time:'', pace_ok:'', reflection:'',
-    status:'open'
-  });
-  saveS();
-  showSt('before-status','ok','Session saved ✓ — go do the work. Return to During or After whenever ready.');
-  // reset
-  document.getElementById('b-task').value='';
-  document.getElementById('b-prediction').value='';
-  document.getElementById('b-domain').value='people';
-  document.getElementById('b-novelty').value='1';
-  document.getElementById('b-stakes').value='1';
-  calcCx(); resetRating('conf'); resetChips('loop');
+  if(!task){showSt('before-status','err','Add a task description.');return;}
+  if(!pred){showSt('before-status','err','Add your prediction.');return;}
+  if(!ratings.conf){showSt('before-status','err','Rate your confidence (1–5).');return;}
+  if(!SCRIPT_URL){showSt('before-status','err','Connect to Google Sheets first — see the header.');return;}
+  const n=+document.getElementById('b-novelty').value,s2=+document.getElementById('b-stakes').value,cx=n*s2;
+  const sess={
+    id:uid(),date:new Date().toISOString(),status:'open',
+    task,domain:document.getElementById('b-domain').value,
+    type:document.getElementById('b-type').value,
+    novelty:n,stakes:s2,complexity:cx,expected_time:getCx(cx).t,
+    prediction:pred,confidence:ratings.conf,loop:chips.loop||'',
+    clarity:'',anxiety:'',phrase:'',
+    outcome:'',outcome_note:'',quality:'',time:'',pace_ok:'',
+    intent_match:'',intent_note:'',reflection:'',
+  };
+  showSt('before-status','info','Saving…');
+  try{
+    await apiCall({action:'upsertSession',...sess});
+    openSessions.push(sess);cacheLocal();
+    showSt('before-status','ok','Saved ✓ — go do the work. Return to During or After when ready.');
+    // reset form
+    document.getElementById('b-task').value='';
+    document.getElementById('b-prediction').value='';
+    document.getElementById('b-type').value='structured';
+    document.getElementById('b-domain').value='people';
+    document.getElementById('b-novelty').value='1';
+    document.getElementById('b-stakes').value='1';
+    calcCx('b');resetRating('conf');resetChip('loop');
+  }catch(e){
+    showSt('before-status','err','Could not save to Sheets. Check your connection.');
+  }
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  DURING
-// ══════════════════════════════════════════════════════════════════
-function renderDuringList(){
-  const open=sessions.filter(s=>s.status==='open');
-  const list=filterM(open,'dur-filter').sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const el=document.getElementById('during-list');
-  if(!list.length){ el.innerHTML='<div class="empty-state">No open sessions — log one in Before first.</div>'; return; }
-  el.innerHTML=list.map(s=>`
-    <div class="si${selDur===s.id?' selected':''}" onclick="selectDuring('${s.id}')">
-      <div class="si-top"><div class="si-task">${esc(s.task)}</div><div class="si-date">${fmtShort(s.date)}</div></div>
-      <div class="si-meta">
-        <span class="badge bd">${s.domain}</span>
-        <span class="badge bc">cx ${s.complexity}</span>
-        <span class="badge bk">conf ${s.confidence}/5</span>
-        ${s.clarity?'<span class="badge bg">check-in ✓</span>':''}
-      </div>
-      <div class="si-pred">"${esc(s.prediction)}"</div>
-    </div>`).join('');
+// ═══════════════════════════════════════════════════════════════
+//  SAVE DURING
+// ═══════════════════════════════════════════════════════════════
+async function saveDuring(){
+  if(!selDur){showSt('during-status','err','Select a session first.');return;}
+  const s=openSessions.find(x=>x.id===selDur);
+  s.anxiety=ratings.anx||'';s.clarity=chips.clarity||'';
+  s.phrase=chips.phrase||'';s.status='during';
+  showSt('during-status','info','Saving…');
+  try{
+    await apiCall({action:'upsertSession',...s});
+    cacheLocal();
+    showSt('during-status','ok','Check-in saved ✓ — carry on.');
+    renderList('during');
+  }catch(e){
+    showSt('during-status','err','Could not save. Check your connection.');
+  }
 }
-function selectDuring(id){
-  selDur=id;
-  const s=sessions.find(x=>x.id===id);
-  renderDuringList();
-  document.getElementById('dur-sel-box').innerHTML=`
-    <div class="sel-box-title">Selected — ${fmtFull(s.date)}</div>
-    <div class="sel-box-task">${esc(s.task)}</div>
-    <div class="sel-box-pred">"${esc(s.prediction)}"</div>`;
-  resetRating('anx'); resetChips('clarity'); resetChips('phrase');
-  if(s.anxiety) setRating('anx',+s.anxiety);
-  if(s.clarity) setChipByVal('clarity',s.clarity);
-  if(s.phrase)  setChipByVal('phrase',s.phrase);
-  document.getElementById('during-form').style.display='block';
-  document.getElementById('during-status').className='status';
-}
-function saveDuring(){
-  if(!selDur){ showSt('during-status','err','Select a session first.'); return; }
-  const s=sessions.find(x=>x.id===selDur);
-  s.anxiety=ratings.anx||''; s.clarity=chipState.clarity||''; s.phrase=chipState.phrase||'';
-  saveS(); showSt('during-status','ok','Check-in saved ✓ — carry on.'); renderDuringList();
-}
-function cancelDuring(){ selDur=null; document.getElementById('during-form').style.display='none'; renderDuringList(); }
 
-// ══════════════════════════════════════════════════════════════════
-//  AFTER
-// ══════════════════════════════════════════════════════════════════
-function renderAfterList(){
-  const open=sessions.filter(s=>s.status==='open');
-  const list=filterM(open,'aft-filter').sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const el=document.getElementById('after-list');
-  if(!list.length){ el.innerHTML='<div class="empty-state">No open sessions — log one in Before first.</div>'; return; }
-  el.innerHTML=list.map(s=>`
-    <div class="si${selAft===s.id?' selected':''}" onclick="selectAfter('${s.id}')">
-      <div class="si-top"><div class="si-task">${esc(s.task)}</div><div class="si-date">${fmtShort(s.date)}</div></div>
-      <div class="si-meta">
-        <span class="badge bd">${s.domain}</span>
-        <span class="badge bc">cx ${s.complexity}</span>
-        <span class="badge bk">conf ${s.confidence}/5</span>
-        ${s.clarity?'<span class="badge bg">check-in ✓</span>':''}
-      </div>
-      <div class="si-pred">"${esc(s.prediction)}"</div>
-    </div>`).join('');
-}
-function selectAfter(id){
-  selAft=id;
-  const s=sessions.find(x=>x.id===id);
-  renderAfterList();
-  document.getElementById('aft-sel-box').innerHTML=`
-    <div class="sel-box-title">Closing — ${fmtFull(s.date)}</div>
-    <div class="sel-box-task">${esc(s.task)}</div>
-    <div class="sel-box-pred">"${esc(s.prediction)}"</div>`;
-  resetRating('qual'); resetChips('outcome');
-  document.getElementById('a-time').value='';
-  document.getElementById('a-reflect').value='';
-  document.getElementById('a-outcome-note').value='';
-  document.getElementById('pace-wrap').style.display='none';
-  document.getElementById('outcome-note-wrap').style.display='none';
-  document.getElementById('after-status').className='status';
-  document.getElementById('after-form').style.display='block';
-}
+// ═══════════════════════════════════════════════════════════════
+//  COMPLETE SESSION (After)
+// ═══════════════════════════════════════════════════════════════
 async function completeSession(){
-  if(!selAft){ showSt('after-status','err','Select a session first.'); return; }
-  if(!chipState.outcome){ showSt('after-status','err','Score the prediction outcome.'); return; }
-  if(!ratings.qual){ showSt('after-status','err','Rate the output quality.'); return; }
-  const s=sessions.find(x=>x.id===selAft);
+  if(!selAft){showSt('after-status','err','Select a session first.');return;}
+  if(!chips.outcome){showSt('after-status','err','Score the prediction outcome.');return;}
+  if(!ratings.qual){showSt('after-status','err','Rate the output quality.');return;}
+  const s=openSessions.find(x=>x.id===selAft);
   const time=+document.getElementById('a-time').value||'';
-  const d=getCx(s.complexity);
+  const d=getCx(+s.complexity||1);
   const pok=time?(time<d.min?'fast':time<=d.max?'ok':'long'):'';
-  s.outcome=chipState.outcome;
+  s.outcome=chips.outcome;
   s.outcome_note=document.getElementById('a-outcome-note').value.trim();
-  s.quality=ratings.qual; s.time=time; s.pace_ok=pok;
+  s.intent_match=chips.intent||'';
+  s.intent_note=document.getElementById('a-intent-note').value.trim();
+  s.quality=ratings.qual;s.time=time;s.pace_ok=pok;
   s.reflection=document.getElementById('a-reflect').value.trim();
   s.status='done';
-  saveS();
-  const url=(localStorage.getItem(UKEY)||'').trim();
-  if(url){
-    const p=new URLSearchParams({
-      date:fmtShort(s.date),task:s.task,domain:s.domain,novelty:s.novelty,stakes:s.stakes,
-      complexity:s.complexity,prediction:s.prediction,confidence:s.confidence,loop:s.loop,
-      clarity:s.clarity||'',anxiety:s.anxiety||'',phrase:s.phrase||'',outcome:s.outcome,
-      quality:s.quality,time:s.time,expected_time:s.expected_time,pace_ok:s.pace_ok,reflection:s.reflection
-    }).toString();
-    try{
-      await fetch(url+'?'+p,{method:'GET',mode:'no-cors'});
-      showSt('after-status','ok','Session completed ✓ and submitted to Google Sheets.');
-    }catch(e){
-      showSt('after-status','err','Saved locally but could not reach Google Sheets — check your URL.');
-    }
-  } else {
-    showSt('after-status','ok','Session completed ✓ — no Sheets URL set, saved locally only.');
+  showSt('after-status','info','Submitting…');
+  try{
+    await apiCall({
+      action:'completeSession',
+      ...s,
+      date:fmtShort(s.date),
+    });
+    openSessions=openSessions.filter(x=>x.id!==selAft);
+    cacheLocal();
+    showSt('after-status','ok','Completed ✓ — logged to Google Sheets.');
+    selAft=null;
+    document.getElementById('after-form').style.display='none';
+    buildFilter('after');renderList('after');
+    buildFilter('during');
+  }catch(e){
+    showSt('after-status','err','Could not submit. Session saved — try again when online.');
   }
-  selAft=null;
-  document.getElementById('after-form').style.display='none';
-  buildFilter('aft-filter'); renderAfterList();
-  buildFilter('dur-filter');
 }
-function cancelAfter(){ selAft=null; document.getElementById('after-form').style.display='none'; renderAfterList(); }
 
-// ══════════════════════════════════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//  SAVE RETROSPECTIVE
+// ═══════════════════════════════════════════════════════════════
+async function saveRetro(){
+  const task=document.getElementById('r-task').value.trim();
+  const thought=document.getElementById('r-thought').value.trim();
+  const actual=document.getElementById('r-actual').value.trim();
+  if(!task){showSt('retro-status','err','Describe the situation first.');return;}
+  if(!ratings.rconf){showSt('retro-status','err','Rate your confidence at the time.');return;}
+  if(!SCRIPT_URL){showSt('retro-status','err','Connect to Google Sheets first — see the header.');return;}
+  const n=+document.getElementById('r-novelty').value;
+  const s2=+document.getElementById('r-stakes').value;
+  const cx=n*s2;
+  const rawDate=document.getElementById('r-date').value;
+  const dateIso=rawDate?new Date(rawDate).toISOString():new Date().toISOString();
+  const intentNote=thought&&actual?`Thought: ${thought} / Actually: ${actual}`:'';
+  const sess={
+    id:uid(),date:dateIso,status:'done',type:'retro',
+    task,domain:document.getElementById('r-domain').value,
+    novelty:n,stakes:s2,complexity:cx,expected_time:getCx(cx).t,
+    prediction:document.getElementById('r-prediction').value.trim(),
+    confidence:ratings.rconf,loop:chips['r-loop']||'',
+    clarity:'retrospective',anxiety:'',phrase:'',
+    outcome:chips['r-outcome']||'',outcome_note:'',
+    quality:ratings.rqual||'',time:'',pace_ok:'',
+    intent_match:chips['r-intent']||'',
+    intent_note:intentNote,
+    reflection:document.getElementById('r-reflect').value.trim(),
+  };
+  showSt('retro-status','info','Saving…');
+  try{
+    // retrospectives go straight to Session Log (they are already complete)
+    await apiCall({
+      action:'completeSession',
+      ...sess,
+      date:fmtShort(sess.date),
+    });
+    showSt('retro-status','ok','Retrospective logged ✓ — written to Google Sheets.');
+    // reset
+    ['r-task','r-thought','r-actual','r-prediction','r-reflect'].forEach(id=>document.getElementById(id).value='');
+    ['rconf','rqual'].forEach(resetRating);
+    ['r-intent','r-outcome','r-loop'].forEach(resetChip);
+    document.getElementById('r-date').value=new Date().toISOString().split('T')[0];
+    calcCx('r');
+  }catch(e){
+    showSt('retro-status','err','Could not save. Check your connection.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STATUS
+// ═══════════════════════════════════════════════════════════════
 function showSt(id,type,msg){
   const el=document.getElementById(id);
-  el.className='status '+type; el.textContent=msg;
-  if(type==='ok') setTimeout(()=>{ if(el.textContent===msg) el.className='status'; },7000);
+  el.className='status '+type;el.textContent=msg;
+  if(type==='ok')setTimeout(()=>{if(el.textContent===msg)el.className='status';},8000);
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 //  INIT
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
-  loadS(); loadUrl(); calcCx(); initChips();
+  initChips();
+  calcCx('b');calcCx('r');
+  document.getElementById('r-date').value=new Date().toISOString().split('T')[0];
+  // close modal on overlay click
+  document.getElementById('setup-modal').addEventListener('click',function(e){
+    if(e.target===this)closeSetup();
+  });
+  initUrl();
 });
 </script>
 </body>
